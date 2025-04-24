@@ -1,21 +1,13 @@
-"use server";
-
+// src/app/api/sign-up/route.ts
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import crypto from "crypto";
 
-// Initialise Resend avec ta clé API
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-// Génère un mot de passe aléatoire
-function generateRandomPassword(length = 12) {
-  return crypto.randomBytes(length).toString("base64").slice(0, length);
+function generateRandomPassword(len = 12) {
+  return crypto.randomBytes(len).toString("base64").slice(0, len);
 }
 
-// Route API POST
 export async function POST(req: Request) {
   const { username, email } = await req.json();
-
   if (!username || !email) {
     return NextResponse.json(
       { success: false, error: "Champs manquants." },
@@ -25,51 +17,47 @@ export async function POST(req: Request) {
 
   const randomPassword = generateRandomPassword();
 
-  try {
-    // 🔐 Créer l'utilisateur dans Strapi
-    const strapiRes = await fetch(
-      `${process.env.STRAPI_URL}/api/auth/local/register`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username,
-          email,
-          password: randomPassword,
-        }),
-      }
-    );
-
-    const strapiData = await strapiRes.json();
-
-    if (!strapiRes.ok) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: strapiData.error?.message || "Erreur Strapi.",
-        },
-        { status: 500 }
-      );
+  // 1. Création de l’utilisateur
+  const registerRes = await fetch(
+    `${process.env.STRAPI_URL}/api/auth/local/register`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password: randomPassword }),
     }
-
-    // 📧 Envoie l'email avec le lien de reset
-    await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: email,
-      subject: "Définissez votre mot de passe",
-      html: `
-        <p>Bienvenue ${username},</p>
-        <p>Pour définir votre mot de passe, cliquez sur le lien ci-dessous :</p>
-        <p><a href="${process.env.APP_URL}/reset-password">Définir mon mot de passe</a></p>
-      `,
-    });
-
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error(err);
+  );
+  if (!registerRes.ok) {
+    const err = await registerRes.json();
+    console.error("Register error:", err);
     return NextResponse.json(
-      { success: false, error: "Erreur serveur." },
+      { success: false, error: err.error?.message || "Erreur register" },
       { status: 500 }
     );
   }
+
+  // 2. Demande de reset‑password
+  const fpRes = await fetch(
+    `${process.env.STRAPI_URL}/api/auth/forgot-password`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    }
+  );
+
+  const fpBody = await fpRes.json();
+  console.log("forgot-password status:", fpRes.status, fpBody);
+
+  if (!fpRes.ok) {
+    // on renvoie l’erreur au client pour debug
+    return NextResponse.json(
+      {
+        success: false,
+        error: fpBody.error?.message || JSON.stringify(fpBody),
+      },
+      { status: fpRes.status }
+    );
+  }
+
+  return NextResponse.json({ success: true });
 }

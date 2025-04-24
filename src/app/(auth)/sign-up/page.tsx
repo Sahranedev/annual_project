@@ -101,7 +101,10 @@ export default function SignUp() {
               </button>
 
               <div>
-                <a href="#" className="text-sm text-pink-600 hover:underline">
+                <a
+                  href="/forgot-password"
+                  className="text-sm text-pink-600 hover:underline"
+                >
                   Mot de passe perdu ?
                 </a>
               </div>
