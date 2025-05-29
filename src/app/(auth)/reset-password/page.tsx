@@ -29,7 +29,7 @@ export default function ResetPasswordPage() {
     }
 
     alert("Mot de passe mis à jour !");
-    router.push("/sign-in");
+    router.push("/sign-up");
   }
   return (
     <div className="flex w-full h-[500px]">

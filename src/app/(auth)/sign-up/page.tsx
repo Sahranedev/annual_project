@@ -1,20 +1,50 @@
 "use client";
 import { useState, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SignUp() {
-  // State pour le username et l'email
+  const router = useRouter();
+
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
   const [signUpUsername, setSignUpUsername] = useState("");
   const [signUpEmail, setSignUpEmail] = useState("");
 
-  // Gestion du submit
+  async function handleLogin(e: FormEvent) {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("/api/sign-in", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erreur de connexion");
+      }
+
+      localStorage.setItem("token", data.jwt);
+      if (rememberMe) {
+        localStorage.setItem("remember", "true");
+      }
+      router.push("/profile");
+    } catch (err: Error | unknown) {
+      console.error(err);
+      const errorMessage =
+        err instanceof Error ? err.message : "Erreur inconnue";
+      alert("Erreur de connexion : " + errorMessage);
+    }
+  }
+
   async function handleSignUp(e: FormEvent) {
     e.preventDefault();
 
     try {
-      // Appel vers notre route "server" (en Next.js) qui :
-      // - Génère un password aléatoire
-      // - Crée l’utilisateur dans Strapi
-      // - Envoie l’email de reset
       const response = await fetch("/api/sign-up", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -32,12 +62,13 @@ export default function SignUp() {
       alert(
         "Inscription réussie, vérifiez votre boîte mail pour définir votre mot de passe !"
       );
-      // Optionnel : réinitialiser les champs
       setSignUpUsername("");
       setSignUpEmail("");
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       console.error(err);
-      alert("Une erreur est survenue : " + err.message);
+      const errorMessage =
+        err instanceof Error ? err.message : "Erreur inconnue";
+      alert("Une erreur est survenue : " + errorMessage);
     }
   }
 
@@ -49,11 +80,10 @@ export default function SignUp() {
       {/* Bloc de droite */}
       <div className="w-2/3 flex flex-col justify-center px-16 py-10">
         <div className="flex flex-row gap-16">
-          {/* FORMULAIRE LOGIN (inchangé) */}
+          {/* FORMULAIRE LOGIN */}
           <div className="w-1/2">
             <h3 className="mb-4 text-xl font-semibold">Se connecter</h3>
-            <form className="flex flex-col gap-4">
-              {/* Identifiant / email */}
+            <form className="flex flex-col gap-4" onSubmit={handleLogin}>
               <div>
                 <label
                   htmlFor="login-email"
@@ -65,10 +95,12 @@ export default function SignUp() {
                   id="login-email"
                   type="text"
                   className="mt-1 w-full border border-gray-300 p-2"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  required
                 />
               </div>
 
-              {/* Mot de passe */}
               <div>
                 <label
                   htmlFor="login-password"
@@ -80,15 +112,19 @@ export default function SignUp() {
                   id="login-password"
                   type="password"
                   className="mt-1 w-full border border-gray-300 p-2"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
               </div>
 
-              {/* Se souvenir / bouton */}
               <div className="flex items-center justify-between">
                 <label className="inline-flex items-center">
                   <input
                     type="checkbox"
                     className="h-4 w-4 border-gray-300 text-pink-600 focus:ring-pink-500"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                   />
                   <span className="ml-2 text-sm text-gray-700">
                     Se souvenir de moi
@@ -96,7 +132,10 @@ export default function SignUp() {
                 </label>
               </div>
 
-              <button className="w-fit rounded bg-pink-100 px-4 py-2 text-black hover:bg-pink-200 cursor-pointer">
+              <button
+                type="submit"
+                className="w-fit rounded bg-pink-100 px-4 py-2 text-black hover:bg-pink-200 cursor-pointer"
+              >
                 Se connecter
               </button>
 
@@ -105,7 +144,7 @@ export default function SignUp() {
                   href="/forgot-password"
                   className="text-sm text-pink-600 hover:underline"
                 >
-                  Mot de passe perdu ?
+                  Mot de passe perdu ?
                 </a>
               </div>
             </form>
@@ -133,7 +172,6 @@ export default function SignUp() {
                 />
               </div>
 
-              {/* Adresse e-mail */}
               <div>
                 <label
                   htmlFor="signup-email"

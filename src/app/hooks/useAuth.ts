@@ -1,10 +1,8 @@
-// src/hooks/useAuth.ts
 import { useState, useEffect } from "react";
 
 type User = { id: number; username: string };
 
 export function useAuth() {
-  // user = undefined tant qu’on n’a pas appelé l’API
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 

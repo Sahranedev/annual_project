@@ -10,7 +10,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.replace("/(auth)/sign-in");
+      router.replace("/(auth)/sign-up");
     }
   }, [loading, isAuthenticated, router]);
 
@@ -22,12 +22,10 @@ export default function ProfilePage() {
     );
   }
 
-  // À ce stade loading = false et isAuthenticated = true
   return (
     <div className="p-8">
       <h1 className="text-2xl font-semibold">Bienvenue, {user?.username} !</h1>
       <p>ID : {user?.id}</p>
-      {/* le reste de ton profil */}
     </div>
   );
 }

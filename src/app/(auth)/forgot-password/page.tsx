@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
       setStatus("Envoyé");
     } else {
       const body = await res.json();
-      setError(body.error || "Erreur lors de l’envoi");
+      setError(body.error || "Erreur lors de l'envoi");
       setStatus("error");
     }
   }
@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
             <p className="text-green-600">
               Un email de réinitialisation a été envoyé !
               <button
-                onClick={() => router.push("/sign-in")}
+                onClick={() => router.push("/sign-up")}
                 className="mt-4 block text-pink-600 hover:underline"
               >
                 Retour à la connexion
