@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      identifier, // email ou username
+      identifier, // dans le site de la prof c'est email donc ici identifier = email
       password,
     }),
   });
@@ -29,6 +29,9 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     jwt: data.jwt,
-    user: data.user,
+    user: {
+      id: data.user.id,
+      username: data.user.username,
+    },
   });
 }

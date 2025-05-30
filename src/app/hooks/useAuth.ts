@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
+import { useAuthStore } from "../store/authStore";
 
 type User = { id: number; username: string };
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const { token, user, isAuthenticated, setUser } = useAuthStore();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
     if (!token) {
-      setUser(null);
       setLoading(false);
       return;
     }
@@ -23,15 +22,14 @@ export function useAuth() {
       })
       .then((data: User) => setUser(data))
       .catch(() => {
-        localStorage.removeItem("token");
-        setUser(null);
+        useAuthStore.getState().logout();
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [token, setUser]);
 
   return {
     user,
-    isAuthenticated: !!user,
+    isAuthenticated,
     loading,
   };
 }

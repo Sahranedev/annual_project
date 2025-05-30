@@ -1,4 +1,3 @@
-// src/app/api/sign-up/route.ts
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
@@ -17,7 +16,7 @@ export async function POST(req: Request) {
 
   const randomPassword = generateRandomPassword();
 
-  // 1. Création de l’utilisateur
+  // Création de l’utilisateur
   const registerRes = await fetch(
     `${process.env.STRAPI_URL}/api/auth/local/register`,
     {
@@ -35,7 +34,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // 2. Demande de reset‑password
+  // Demande de reset‑password
   const fpRes = await fetch(
     `${process.env.STRAPI_URL}/api/auth/forgot-password`,
     {
@@ -49,7 +48,6 @@ export async function POST(req: Request) {
   console.log("forgot-password status:", fpRes.status, fpBody);
 
   if (!fpRes.ok) {
-    // on renvoie l’erreur au client pour debug
     return NextResponse.json(
       {
         success: false,
