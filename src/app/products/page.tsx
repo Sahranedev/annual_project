@@ -34,9 +34,7 @@ export default async function Page({ searchParams }: PageProps) {
 
   const data = await res.json()
   const products = data.data
-
-  console.log('products', products);
-
+  
   return (
     <div>
       <div className='w-full h-80 bg-gray-300 mb-10'></div>
