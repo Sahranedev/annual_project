@@ -1,9 +1,11 @@
 "use client";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "../../store/authStore";
 
 export default function SignUp() {
   const router = useRouter();
+  const { setToken, setUser } = useAuthStore();
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +30,9 @@ export default function SignUp() {
         throw new Error(data.error || "Erreur de connexion");
       }
 
-      localStorage.setItem("token", data.jwt);
+      setToken(data.jwt);
+      setUser(data.user);
+
       if (rememberMe) {
         localStorage.setItem("remember", "true");
       }
