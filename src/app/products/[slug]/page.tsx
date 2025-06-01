@@ -10,11 +10,8 @@ import Reviews from '@/components/products/Reviews'
 export default function ProductPage ({ params }: { params: Promise<{ slug: string }> }) {
   const router = useRouter()
   const { slug } = use(params)
-
   const [product, setProduct] = useState<any | null>(null)
-  const [reviews, setReviews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [loadingReviews, setLoadingReviews] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<number | null>(null)
   const [imgSelected, setImgSelected] = useState<string | null>(null)
@@ -22,7 +19,6 @@ export default function ProductPage ({ params }: { params: Promise<{ slug: strin
   const [isPompom, setIsPompom] = useState<boolean>(false)
 
   useEffect(() => {
-    console.log('slug', slug)
     const fetchProduct = async () => {
       setLoading(true)
       try {
@@ -46,28 +42,6 @@ export default function ProductPage ({ params }: { params: Promise<{ slug: strin
         setLoading(false)
       }
     }
-
-    const fetchReviews = async () => {
-      setLoadingReviews(true)
-      try {
-        const res = await fetch(
-          `http://localhost:1337/api/reviews?filters[product][slug][$eq]=${slug}&populate[img]=true`,
-          { cache: 'no-store' }
-        )
-        if (!res.ok) throw new Error('Échec du chargement des avis')
-        const data = await res.json()
-        const fetchedReviews = data.data
-
-        setReviews(fetchedReviews)
-      } catch (err) {
-        console.error(err)
-        setError('Erreur de chargement des avis')
-      }
-      finally {
-        setLoadingReviews(false)
-      }
-    }
-    fetchReviews()
 
     fetchProduct()
   }, [slug, router])
@@ -296,7 +270,7 @@ export default function ProductPage ({ params }: { params: Promise<{ slug: strin
 
       {/* Reviews */}
       <div className="mt-16">
-        <Reviews productId={product.id} reviews={reviews}/>
+        <Reviews productId={product.id} productSlug={slug} />
       </div>
     </div>
   )

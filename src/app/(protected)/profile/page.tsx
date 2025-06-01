@@ -10,7 +10,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.replace("/(auth)/sign-up");
+      router.replace("/sign-up");
     }
   }, [loading, isAuthenticated, router]);
 
