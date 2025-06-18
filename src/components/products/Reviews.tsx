@@ -153,126 +153,155 @@ export default function Reviews({ productId, productSlug }: ReviewsProps) {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Avis</h2>
-      <p className="text-sm text-gray-500 mb-4">
-        Note moyenne : {averageGrade} ({totalReviews} avis)
-      </p>
-      <div className="flex flex-col gap-2 mb-8">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <div key={star} className="flex items-center gap-1">
-            {[1, 2, 3, 4, 5].map((index) => (
-              <span key={index} className={`${index <= star ? 'text-yellow-500' : 'text-gray-300'}`}>★</span>
+      <h2 className="text-2xl font-bold mb-4">Avis clients</h2>
+      
+      {/* Rating Summary */}
+      <div className="flex items-center gap-4 mb-8">
+        <div className="text-4xl font-bold text-gray-900">{averageGrade.toFixed(1)}</div>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span key={star} className={`text-2xl ${star <= Math.round(averageGrade) ? 'text-yellow-500' : 'text-gray-300'}`}>★</span>
             ))}
-            <span className="text-gray-500">{gradeCount[star as keyof typeof gradeCount]}</span>
+          </div>
+          <p className="text-sm text-gray-500">Basé sur {totalReviews} avis</p>
+        </div>
+      </div>
+
+      {/* Rating Distribution */}
+      <div className="flex flex-col gap-2 mb-8">
+        {[5, 4, 3, 2, 1].map((star) => (
+          <div key={star} className="flex items-center gap-2">
+            <div className="w-16 text-sm text-gray-600">{star} étoiles</div>
+            <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-yellow-500 rounded-full"
+                style={{ 
+                  width: `${(gradeCount[star as keyof typeof gradeCount] / totalReviews) * 100}%` 
+                }}
+              />
+            </div>
+            <div className="w-12 text-sm text-gray-600 text-right">
+              {gradeCount[star as keyof typeof gradeCount]}
+            </div>
           </div>
         ))}
       </div>
 
+      {/* Review Form */}
       {token ? (
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 mb-8"
-          encType="multipart/form-data"
-        >
-          <div className="flex items-center gap-2">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => handleRatingClick(star)}
-                onMouseEnter={() => setHoverRating(star)}
-                onMouseLeave={() => setHoverRating(0)}
-                className="text-2xl focus:outline-none"
-              >
-                <span className={star <= (hoverRating || rating) ? "text-yellow-500" : "text-gray-300"}>
-                  ★
-                </span>
-              </button>
-            ))}
-          </div>
-          <textarea
-            id="review"
-            {...register("review", { required: true })}
-            placeholder="Votre avis..."
-            className="bg-gray-100 p-4 rounded-md focus:outline-none"
-            rows={4}
-          />
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            className="bg-gray-100 p-2 rounded-md"
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white p-4 rounded-md hover:bg-blue-700 transition"
+        <div className="mb-8 p-6 bg-gray-50 rounded-lg">
+          <h3 className="text-lg font-semibold mb-4">Ajouter un avis</h3>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+            encType="multipart/form-data"
           >
-            Envoyer
-          </button>
-        </form>
+            <div className="flex items-center gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => handleRatingClick(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  className="text-2xl focus:outline-none"
+                >
+                  <span className={star <= (hoverRating || rating) ? "text-yellow-500" : "text-gray-300"}>
+                    ★
+                  </span>
+                </button>
+              ))}
+            </div>
+            <textarea
+              id="review"
+              {...register("review", { required: true })}
+              placeholder="Partagez votre expérience avec ce produit..."
+              className="bg-white p-4 rounded-md focus:outline-none border border-gray-300 focus:border-pink-500"
+              rows={4}
+            />
+            <div className="flex flex-col gap-2">
+              <label className="text-sm text-gray-600">Ajouter une photo (optionnel)</label>
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                className="bg-white p-2 rounded-md border border-gray-300"
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-pink-600 text-white p-4 rounded-md hover:bg-pink-700 transition"
+            >
+              Publier mon avis
+            </button>
+          </form>
+        </div>
       ) : (
-        <div className="flex flex-col gap-4 mb-8">
-          <p className="text-gray-500">Veuillez vous connecter pour laisser un avis</p>
-          <button className="bg-blue-600 text-white p-4 rounded-md hover:bg-blue-700 transition">
+        <div className="mb-8 p-6 bg-gray-50 rounded-lg">
+          <p className="text-gray-600 mb-4">Veuillez vous connecter pour laisser un avis</p>
+          <button className="bg-pink-600 text-white p-4 rounded-md hover:bg-pink-700 transition">
             Se connecter
           </button>
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold">Liste des avis</h3>
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-          className="bg-white border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
-        >
-          <option value="desc">Note décroissante</option>
-          <option value="asc">Note croissante</option>
-        </select>
-      </div>
-
-      {reviews.length > 0 && (
-        <div className="flex flex-col gap-4 mb-8">
-          {reviews.map((review) => (
-            <div
-              key={review.id}
-              className="bg-gray-100 p-4 rounded-lg shadow-sm"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {review.user && review.user.username ? review.user.username[0].toUpperCase() : 'A'}
-                </div>
-                <span className="font-semibold">{review.user && review.user.username || 'Anonyme'}</span>
-              </div>
-              <p className="mb-2">
-                {Array.from({ length: review.grade }, (_, i) => (
-                  <span key={i} className="text-yellow-500">
-                    ★
-                  </span>
-                ))}
-                {Array.from(
-                  { length: 5 - review.grade },
-                  (_, i) => (
-                    <span key={i} className="text-gray-300">
-                      ★
-                    </span>
-                  )
-                )}
-              </p>
-              <p className="mb-2">{review.comment}</p>
-              {review.img && (
-                <Image
-                  src={`http://localhost:1337${review.img.url}`}
-                  alt="Illustration de l'avis"
-                  width={200}
-                  height={200}
-                  objectFit="cover"
-                />
-              )}
-            </div>
-          ))}
+      {/* Reviews List */}
+      <div className="space-y-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold">Tous les avis</h3>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+            className="bg-white border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+          >
+            <option value="desc">Plus récents</option>
+            <option value="asc">Plus anciens</option>
+          </select>
         </div>
-      )}
+
+        {reviews.length > 0 ? (
+          <div className="space-y-6">
+            {reviews.map((review) => (
+              <div
+                key={review.id}
+                className="bg-white p-6 rounded-lg shadow-sm border border-gray-100"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center text-pink-600 font-bold">
+                    {review.user && review.user.username ? review.user.username[0].toUpperCase() : 'A'}
+                  </div>
+                  <div>
+                    <div className="font-semibold">{review.user && review.user.username || 'Anonyme'}</div>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: review.grade }, (_, i) => (
+                        <span key={i} className="text-yellow-500">★</span>
+                      ))}
+                      {Array.from({ length: 5 - review.grade }, (_, i) => (
+                        <span key={i} className="text-gray-300">★</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-gray-700 mb-4">{review.comment}</p>
+                {review.img && (
+                  <div className="mt-4">
+                    <Image
+                      src={`http://localhost:1337${review.img.url}`}
+                      alt="Illustration de l'avis"
+                      width={200}
+                      height={200}
+                      className="rounded-lg object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center py-8">Aucun avis pour le moment</p>
+        )}
+      </div>
 
       {/* Pagination */}
       {pageCount > 1 && (
