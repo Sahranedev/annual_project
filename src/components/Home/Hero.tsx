@@ -2,14 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default async function Hero() {
-  const response = await fetch(`http://localhost:1337/api/home-page?populate=heroImage&populate=HeroAttribut`);
+  const response = await fetch(`http://localhost:1337/api/home-page?populate=HeroSection&populate=HeroSection.image`);
   const data = await response.json();
   const heroData = data.data;
 
-  console.log(heroData);
-
-  const { heroTitle, heroDescription, heroImage } = heroData;
-  const imageUrl = `http://localhost:1337${heroImage.formats.large.url}`;
+  const { Title, description, image } = heroData.HeroSection;
+  const imageUrl = `http://localhost:1337${image.formats.large.url}`;
 
   return (
     <section className="relative h-screen">
@@ -18,7 +16,7 @@ export default async function Hero() {
           src={imageUrl}
           alt="Hero background"
           fill
-          className="object-cover brightness-50"
+          className="object-cover brightness-50 w-full"
           priority
         />
       </div>
@@ -26,10 +24,10 @@ export default async function Hero() {
       <div className="relative h-full flex items-center justify-center">
         <div className="mx-40 text-white">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 w-1/2">
-            {heroTitle}
+            {Title}
           </h1>
           <p className="text-lg mb-8 w-1/2">
-            {heroDescription}
+            {description}
           </p>
           <Link 
             href="/boutique" 

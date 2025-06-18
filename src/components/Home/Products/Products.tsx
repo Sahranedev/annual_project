@@ -23,17 +23,15 @@ interface Product {
 }
 
 export default async function Creations() {
-  const response = await fetch(`http://localhost:1337/api/home-page?populate[products][populate][0]=images&populate[products][populate]=categories`);
+  const response = await fetch(`http://localhost:1337/api/home-page?populate=Produits&populate=Produits.products&limit=4&populate=Produits.products.images`);
   const data = await response.json();
-  const products = data.data.products;
-
-  console.log(products);
-  
+  const productsData = data.data.Produits;  
 
   return (
-    <section className="py-20 bg-gray-50">
-      <div className="mx-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-      {products.map((product: Product) => (
+    <section className="py-10 bg-gray-50">
+      <h2 className="text-4xl font-medium mb-8 text-center pb-10 max-w-[1500px] mx-auto">{productsData.title}</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-[1500px] mx-auto">
+      {productsData.products.map((product: Product) => (
           <Link key={product.id} href={`/products/${product.slug}`}>
             <div className="group">
               <div className="relative aspect-square mb-4 overflow-hidden">

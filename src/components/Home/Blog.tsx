@@ -1,69 +1,51 @@
 import Link from "next/link";
 import Image from "next/image";
 
-interface BlogPost {
-  id: number;
-  title: string;
-  excerpt: string;
-  date: string;
-  image: string;
-  category: string;
-}
+export default async function Blog() {
+  let articlesData;
 
-const blogPosts: BlogPost[] = [
-  {
-    id: 1,
-    title: "Mon tout premier marché artisanal : retour sur l'expérience",
-    excerpt: "Découvrez mon expérience lors de mon premier marché artisanal...",
-    date: "08/06/2025",
-    image: "/images/blog/marche.jpg",
-    category: "Événements"
-  },
-  {
-    id: 2,
-    title: "Addi King Size vs Sentro 48 : quelle machine choisir pour tes projets créatifs ?",
-    excerpt: "Comparatif détaillé entre les deux machines à tricoter...",
-    date: "04/04/2025",
-    image: "/images/blog/machines.jpg",
-    category: "Matériel"
-  },
-  {
-    id: 3,
-    title: "Quelle laine choisir ? (Guide Complet 2025)",
-    excerpt: "Guide complet pour choisir la laine adaptée à vos projets...",
-    date: "12/03/2025",
-    image: "/images/blog/laine.jpg",
-    category: "Infos"
+  try {
+    const res = await fetch("http://localhost:1337/api/home-page?populate=Blogs&populate=Blogs.articles&populate=Blogs.articles.image", {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch data");
+    }
+
+    const response = await res.json();
+    articlesData = response.data.Blogs;
+  } catch (error) {
+    console.error("Error fetching articles:", error);
   }
-];
 
-export default function Blog() {
   return (
     <section className="pb-20 bg-gray-50">
-      <div className="container mx-auto px-4">
+      <div className="px-4 max-w-[1500px] mx-auto">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-          Découvre le blog ❣️
+          {articlesData.title}
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {blogPosts.map((post) => (
-            <article key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+          {articlesData.articles.map(( article: any) => (
+            <article key={article.id} className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="relative h-48">
                 <Image
-                  src={post.image}
-                  alt={post.title}
+                  src={`http://localhost:1337${article?.image?.formats?.small?.url}` || "/placeholder-image.jpg"}
+                  alt={article.title}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="p-6">
-                <span className="text-sm text-pink-500 font-semibold">{post.category}</span>
-                <h3 className="text-xl font-bold mt-2 mb-3">{post.title}</h3>
-                <p className="text-gray-600 mb-4">{post.excerpt}</p>
+                <span className="text-sm text-pink-500 font-semibold">{article.category || "Général"}</span>
+                <h3 className="text-xl font-bold mt-2 mb-3">{article.title}</h3>
+                <p className="text-gray-600 mb-4">{article.shortDescription}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">{post.date}</span>
+                  <span className="text-sm text-gray-500">{article.publishedAt}</span>
                   <Link 
-                    href={`/blog/${post.id}`}
+                    href={`/blog/${article.documentId}`}
                     className="text-pink-500 hover:text-pink-600 font-semibold"
                   >
                     Lire la suite →

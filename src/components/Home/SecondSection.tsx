@@ -1,15 +1,12 @@
 export default async function SecondSection() {
 
-  const response = await fetch(`http://localhost:1337/api/home-page?populate=Block`);
-  const data = await response.json();
-  const blocks = data.data.Block;
-
-  console.log(blocks);
-  
+  const response = await fetch(`http://localhost:1337/api/home-page?populate=Arguments&populate=Arguments.Arguments`);
+  const data = await response.json();  
+  const blocks = data.data.Arguments.Arguments;  
 
   return (
     <section className="py-20 bg-white">
-      <div className="flex gap-20 mx-40">
+      <div className="flex gap-20 max-w-[1200px] mx-auto">
         {blocks.map((block: any, index: number) => (
           <div key={block.id} className="flex flex-col gap-4 flex-1 even:mt-10">
             <span className="text-pink-200 text-2xl">0{index + 1}</span>
