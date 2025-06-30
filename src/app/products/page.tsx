@@ -1,61 +1,65 @@
-import Filters from '@/components/products/Filters'
-import Image from 'next/image'
-import Link from 'next/link'
+import Filters from "@/components/products/Filters";
+import Image from "next/image";
+import Link from "next/link";
 
 interface Category {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
 interface Product {
-  id: number
-  title: string
-  slug: string
-  price: number
-  Promotion: boolean
-  discountPercent: number
+  id: number;
+  title: string;
+  slug: string | null;
+  price: number;
+  Promotion: boolean;
+  discountPercent: number;
   images: Array<{
     formats: {
-      thumbnail: { url: string }
-      large: { url: string }
-    }
-  }>
-  categories: Category[]
+      thumbnail: { url: string };
+      large: { url: string };
+    };
+  }>;
+  categories: Category[];
 }
 
 interface PageProps {
   searchParams?: {
-    category?: string
-    search?: string
-    minPrice?: string
-    maxPrice?: string
-  }
+    category?: string;
+    search?: string;
+    minPrice?: string;
+    maxPrice?: string;
+  };
 }
 
 export default async function Page({ searchParams }: PageProps) {
-  const { category, minPrice, maxPrice } = await Promise.resolve(searchParams ?? {})
+  const { category, minPrice, maxPrice } = await Promise.resolve(
+    searchParams ?? {}
+  );
 
-  let url = 'http://localhost:1337/api/products?populate=*'
+  let url = "http://localhost:1337/api/products?populate=*";
 
   if (category) {
-    const categoryArray = category.split(',').map((id) => `filters[categories][id][$in]=${id}`)
-    url += `&${categoryArray.join('&')}`
+    const categoryArray = category
+      .split(",")
+      .map((id) => `filters[categories][id][$in]=${id}`);
+    url += `&${categoryArray.join("&")}`;
   }
 
   if (minPrice) {
-    url += `&filters[price][$gte]=${minPrice}`
+    url += `&filters[price][$gte]=${minPrice}`;
   }
   if (maxPrice) {
-    url += `&filters[price][$lte]=${maxPrice}`
+    url += `&filters[price][$lte]=${maxPrice}`;
   }
 
-  const res = await fetch(url, { method: 'GET', cache: 'no-store' })
+  const res = await fetch(url, { method: "GET", cache: "no-store" });
 
-  if (!res.ok) throw new Error('Failed to fetch data')
+  if (!res.ok) throw new Error("Failed to fetch data");
 
-  const data = await res.json()
-  const products: Product[] = data.data
-  
+  const data = await res.json();
+  const products: Product[] = data.data;
+
   return (
     <div className="min-h-screen bg-white">
       <div className="w-full h-96 bg-gray-100 mb-12 relative">
@@ -72,7 +76,10 @@ export default async function Page({ searchParams }: PageProps) {
             </div>
             <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {products.map((product) => (
-                <Link key={product.id} href={`/products/${product.slug}`}>
+                <Link
+                  key={product.id}
+                  href={`/products/${product.slug || product.id}`}
+                >
                   <li className="group">
                     <div className="relative aspect-square mb-4 overflow-hidden">
                       {product.images?.[0]?.formats?.thumbnail?.url && (
@@ -97,17 +104,25 @@ export default async function Page({ searchParams }: PageProps) {
                         {product.categories?.map((category, index) => (
                           <span key={category.id}>
                             {category.name}
-                            {index !== product.categories.length - 1 && ' / '}
+                            {index !== product.categories.length - 1 && " / "}
                           </span>
                         ))}
                       </p>
-                      <h2 className="text-lg font-medium mb-2">{product.title}</h2>
+                      <h2 className="text-lg font-medium mb-2">
+                        {product.title}
+                      </h2>
                       <p className="text-lg">
                         {product.Promotion ? (
                           <>
-                            <span className="line-through text-gray-500">{product.price}€</span>
+                            <span className="line-through text-gray-500">
+                              {product.price}€
+                            </span>
                             <span className="ml-2 text-pink-500 font-medium">
-                              {(product.price - product.price * (product.discountPercent / 100)).toFixed(2)}€
+                              {(
+                                product.price -
+                                product.price * (product.discountPercent / 100)
+                              ).toFixed(2)}
+                              €
                             </span>
                           </>
                         ) : (
@@ -123,5 +138,5 @@ export default async function Page({ searchParams }: PageProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

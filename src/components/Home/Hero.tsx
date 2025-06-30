@@ -1,13 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getImageUrl } from "@/utils/getImageUrl";
 
 export default async function Hero() {
-  const response = await fetch(`http://localhost:1337/api/home-page?populate=HeroSection&populate=HeroSection.image`);
+  const response = await fetch(
+    `http://localhost:1337/api/home-page?populate=HeroSection&populate=HeroSection.image`
+  );
   const data = await response.json();
   const heroData = data.data;
 
   const { Title, description, image } = heroData.HeroSection;
-  const imageUrl = `http://localhost:1337${image.formats.large.url}`;
+  // ⚠️  si "multiple: true" => image[0]
+  const imageUrl = getImageUrl(image);
 
   return (
     <section className="relative h-screen">
@@ -20,17 +24,13 @@ export default async function Hero() {
           priority
         />
       </div>
-      
+
       <div className="relative h-full flex items-center justify-center">
         <div className="mx-40 text-white">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 w-1/2">
-            {Title}
-          </h1>
-          <p className="text-lg mb-8 w-1/2">
-            {description}
-          </p>
-          <Link 
-            href="/boutique" 
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 w-1/2">{Title}</h1>
+          <p className="text-lg mb-8 w-1/2">{description}</p>
+          <Link
+            href="/boutique"
             className="inline-block bg-gray-900 text-white px-8 py-4 rounded-lg text-lg font-semibold"
           >
             Découvrir la boutique
@@ -39,4 +39,4 @@ export default async function Hero() {
       </div>
     </section>
   );
-} 
+}
