@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Aboreto, DM_Sans, Allura } from "next/font/google";
 import "./globals.css";
 import Footer from "./Footer";
 import Header from "./Header";
 import { Toaster } from "../components/ui/Toaster";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const aboreto = Aboreto({
+  variable: "--font-aboreto",
+  subsets: ["latin"],
+  weight: "400"
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const allura = Allura({
+  variable: "--font-dancing-script",
   subsets: ["latin"],
+  weight: "400"
 });
 
 export const metadata: Metadata = {
@@ -29,10 +36,10 @@ export default function RootLayout({
     <html lang="en">
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        className={`${aboreto.variable} ${dmSans.variable} ${allura.variable} antialiased min-h-screen flex flex-col font-dm-sans`}
       >
         <Header />
-        <main className="flex-grow pt-16">{children}</main>
+        <main className="flex-grow">{children}</main>
         <Footer />
         <Toaster />
       </body>

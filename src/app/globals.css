@@ -1,31 +1,150 @@
 @import "tailwindcss";
 
-/* :root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Couleurs principales */
+  --color-primary: #f6bfa3;
+  /* Couleur pêche principale */
+  --color-primary-light: #fdf2f8;
+  /* Rose très clair */
+  --color-primary-dark: #fed7aa;
+  /* Pêche foncé */
+
+  /* Couleurs de texte */
+  --color-text: #171717;
+  /* Texte principal */
+  --color-text-light: #6b7280;
+  /* Texte secondaire */
+
+  /* Couleurs de fond */
+  --color-background: #ffffff;
+  --color-background-alt: #f8f8f8;
+
+  /* Couleurs d'accentuation */
+  --color-accent: #f6bfa3;
+  /* Même que primary pour la cohérence */
+  --color-accent-light: #fdf2f8;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.text-outline {
+  -webkit-text-stroke: 3px var(--color-primary);
+  color: transparent;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #ededed;
+/* Styles personnalisés pour la page À propos */
+.about-gradient {
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary-dark) 100%);
+}
+
+.about-gradient-reverse {
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary-light) 100%);
+}
+
+.about-shadow {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.about-text-shadow {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation pour les éléments */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-} */
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
 
-.text-outline {
-  -webkit-text-stroke: 3px #f6bfa3;
-  color: transparent;
+@theme {
+  --color-black: #303028;
+  --color-pink: #ff6187;
+  --color-orange: #f6b99c;
+  --font-aboreto: "Aboreto", "sans-serif";
+  --font-dm-sans: "DM Sans", "sans-serif";
+  --font-allura: "Allura", "cursive";
+}
+
+/* Custom responsive utilities */
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* Custom responsive utilities */
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* Smooth transitions for mobile filters */
+@layer components {
+  .mobile-filters-enter {
+    transform: translateX(-100%);
+  }
+
+  .mobile-filters-enter-active {
+    transform: translateX(0);
+    transition: transform 300ms ease-out;
+  }
+
+  .mobile-filters-exit {
+    transform: translateX(0);
+  }
+
+  .mobile-filters-exit-active {
+    transform: translateX(-100%);
+    transition: transform 300ms ease-in;
+  }
+}
+
+/* Custom scrollbar for mobile */
+@media (max-width: 1024px) {
+  .mobile-filters-enter {
+    transform: translateX(-100%);
+  }
+
+  .mobile-filters-enter-active {
+    transform: translateX(0);
+    transition: transform 300ms ease-out;
+  }
+
+  .mobile-filters-exit {
+    transform: translateX(0);
+  }
+
+  .mobile-filters-exit-active {
+    transform: translateX(-100%);
+    transition: transform 300ms ease-in;
+  }
 }

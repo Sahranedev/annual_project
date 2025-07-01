@@ -57,7 +57,7 @@ export default function Footer() {
               >
                 <Image
                   src={"http://localhost:1337" + footerData.footer_main.img.url}
-                  alt={footerData.footer_main.img.alternativeText}
+                  alt="logo"
                   fill
                   style={{ objectFit: "contain" }}
                   priority
