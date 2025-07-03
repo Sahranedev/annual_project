@@ -37,7 +37,8 @@ export default function Header() {
         const route =
           "header?populate[0]=logo&populate[1]=links&populate[2]=links.sublinks&populate[3]=links.sublinks.img";
         const { data } = await ApiHelper(route, "GET");
-        setHeaderData(data?.attributes || {});
+        console.log(data);
+        setHeaderData(data || {});
       } catch (error) {
         console.log(error);
       }
@@ -66,21 +67,19 @@ export default function Header() {
         <div className="flex h-16 justify-between">
           {/* Logo */}
           {headerData.logo && (
-            <div className="flex-shrink-0">
-              <Link
-                className="flex items-center"
-                href="/"
-                onClick={handleLinkClick}
-              >
-                <Image
-                  src={"http://localhost:1337" + headerData.logo.url}
-                  alt={headerData.logo.alternativeText || "Logo"}
-                  width={32}
-                  height={32}
-                  className="h-8 w-auto"
-                />
-              </Link>
-            </div>
+            <Link
+              className="flex items-center"
+              href="/"
+              onClick={handleLinkClick}
+            >
+              <Image
+                src={"http://localhost:1337" + headerData.logo.url}
+                alt={headerData.logo.alternativeText || "Logo"}
+                width={32}
+                height={32}
+                className="h-8 w-auto"
+              />
+            </Link>
           )}
 
           <div className="hidden md:flex md:flex-1 md:items-center md:justify-center">
@@ -88,14 +87,13 @@ export default function Header() {
               {headerData.links &&
                 headerData.links.map((link) => (
                   <div
-                    onMouseEnter={() => toggleMegaMenu(link.id)}
-                    onMouseLeave={() => toggleMegaMenu(link.id)}
                     key={link.id}
                     className="group"
+                    onMouseEnter={() => setActiveMegaMenu(link.id)}
+                    onMouseLeave={() => setActiveMegaMenu(null)}
                   >
                     <div className="flex items-center">
                       <Link
-                        key={link.id}
                         href={link.url}
                         className="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium"
                         onClick={handleLinkClick}
@@ -106,41 +104,39 @@ export default function Header() {
                         <ChevronDownIcon className="h-4 w-4 text-gray-700" />
                       )}
                     </div>
-
-                    {/* Mega Menu */}
+                    {/* Mega Menu Responsive */}
                     {link.sublinks &&
                       link.sublinks.length > 0 &&
                       activeMegaMenu === link.id && (
-                        <div className="absolute left-0 w-full mt-2 p-2 bg-white shadow-lg rounded-md z-50">
-                          <div className="relative grid gap-6 bg-white px-5 py-6 sm:gap-8 sm:p-8">
+                        <div className="absolute left-0 w-screen p-2 bg-white shadow-lg rounded-md z-50">
+                          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 justify-center w-fit mx-auto">
                             {link.sublinks.map((sublink) => (
                               <Link
                                 key={sublink.id}
                                 href={sublink.url}
-                                className="flex items-start rounded-lg hover:bg-gray-50 transition ease-in-out duration-150"
-                                onClick={handleLinkClick}
+                                className="flex flex-col items-start rounded-lg hover:bg-gray-100 transition p-2 w-[200px]"
+                                onClick={() => {
+                                  handleLinkClick();
+                                  setActiveMegaMenu(null);
+                                }}
                               >
                                 {sublink.img && (
                                   <div className="flex-shrink-0">
                                     <Image
-                                      src={
-                                        "http://localhost:1337" +
-                                        sublink.img.url
-                                      }
-                                      alt={
-                                        sublink.img.alternativeText || "Image"
-                                      }
-                                      width={40}
-                                      height={40}
-                                      className="h-10 w-10 rounded-md"
+                                      src={"http://localhost:1337" + sublink.img.url}
+                                      alt={sublink.img.alternativeText || "Image"}
+                                      width={200}
+                                      height={200}
+                                      objectFit="cover"
+                                      className="rounded-md"
                                     />
                                   </div>
                                 )}
-                                <div className="ml-4">
+                                <div>
                                   <p className="text-base font-medium text-gray-900">
                                     {sublink.label}
                                   </p>
-                                  <p className="mt-1 text-sm text-gray-500">
+                                  <p className="mt-1 text-xs text-gray-500">
                                     {sublink.description}
                                   </p>
                                 </div>
@@ -203,7 +199,7 @@ export default function Header() {
                 <div key={link.id}>
                   <div
                     onClick={() => toggleMegaMenu(link.id)}
-                    className="flex justify-between items-center text-gray-700 hover:text-gray-900 block px-3 py-2 text-base font-medium w-full text-left"
+                    className="flex justify-between items-center text-gray-700 hover:text-gray-900 px-3 py-2 text-base font-medium w-full text-left"
                   >
                     <Link
                       key={link.id}
@@ -231,8 +227,12 @@ export default function Header() {
                           <Link
                             key={sublink.id}
                             href={sublink.url}
-                            className="text-gray-600 hover:text-gray-900 block px-3 py-2 text-sm"
-                            onClick={handleLinkClick}
+                            className="text-lg font-semibold hover:text-gray-900 block px-4 py-3"
+                            onClick={() => {
+                              handleLinkClick();
+                              setActiveMegaMenu(null);
+                              setIsMenuOpen(false);
+                            }}
                           >
                             {sublink.label}
                           </Link>
