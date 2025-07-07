@@ -52,21 +52,19 @@ export default function CartItem({
         <div className="flex items-center justify-center">
           <button
             type="button"
-            className="rounded-l bg-gray-200 px-3 py-1 text-sm"
+            className="rounded-l bg-gray-200 px-3 py-1 text-sm cursor-pointer"
             onClick={() => handleQuantityChange(itemQuantity - 1)}
           >
             -
           </button>
           <input
-            type="number"
             min="1"
             value={itemQuantity}
-            onChange={(e) => handleQuantityChange(Number(e.target.value))}
             className="w-12 border-y border-gray-300 py-1 text-center"
           />
           <button
             type="button"
-            className="rounded-r bg-gray-200 px-3 py-1 text-sm"
+            className="rounded-r bg-gray-200 px-3 py-1 text-sm cursor-pointer"
             onClick={() => handleQuantityChange(itemQuantity + 1)}
           >
             +
@@ -78,7 +76,7 @@ export default function CartItem({
         <button
           type="button"
           onClick={() => remove(id)}
-          className="text-red-500 hover:text-red-700"
+          className="text-red-500 hover:text-red-700 cursor-pointer"
         >
           Supprimer
         </button>

@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import {
-  Bars3Icon,
-  XMarkIcon,
-  ShoppingCartIcon,
-  ChevronDownIcon,
-  UserCircleIcon,
-  ChevronUpIcon,
-} from "@heroicons/react/24/outline";
+  FiMenu,
+  FiX,
+  FiShoppingCart,
+  FiChevronDown,
+  FiChevronUp,
+  FiUser,
+} from "react-icons/fi";
 import ApiHelper from "./ApiHelper";
 import Link from "next/link";
 import Image from "next/image";
@@ -103,7 +103,7 @@ export default function Header() {
                         {link.label}
                       </Link>
                       {link.sublinks && link.sublinks.length > 0 && (
-                        <ChevronDownIcon className="h-4 w-4 text-gray-700" />
+                        <FiChevronDown className="h-4 w-4 text-gray-700" />
                       )}
                     </div>
 
@@ -161,7 +161,7 @@ export default function Header() {
               className="relative text-gray-700 hover:text-gray-900"
               onClick={handleLinkClick}
             >
-              <ShoppingCartIcon className="h-6 w-6" />
+              <FiShoppingCart className="h-6 w-6" />
               {mounted && cartItemsCount > 0 && (
                 <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-black text-xs text-white">
                   {cartItemsCount}
@@ -174,7 +174,7 @@ export default function Header() {
               className="text-gray-700 hover:text-gray-900"
               onClick={handleLinkClick}
             >
-              <UserCircleIcon className="h-6 w-6" />
+              <FiUser className="h-6 w-6" />
             </Link>
 
             {/* Bouton menu burger (mobile uniquement) */}
@@ -184,9 +184,9 @@ export default function Header() {
                 className="text-gray-700 hover:text-gray-900 focus:outline-none"
               >
                 {isMenuOpen ? (
-                  <XMarkIcon className="h-6 w-6" />
+                  <FiX className="h-6 w-6" />
                 ) : (
-                  <Bars3Icon className="h-6 w-6" />
+                  <FiMenu className="h-6 w-6" />
                 )}
               </button>
             </div>
@@ -216,9 +216,9 @@ export default function Header() {
                     {link.sublinks &&
                       link.sublinks.length > 0 &&
                       (activeMegaMenu === link.id ? (
-                        <ChevronUpIcon className="h-4 w-4 text-gray-700" />
+                        <FiChevronUp className="h-4 w-4 text-gray-700" />
                       ) : (
-                        <ChevronDownIcon className="h-4 w-4 text-gray-700" />
+                        <FiChevronDown className="h-4 w-4 text-gray-700" />
                       ))}
                   </div>
 
