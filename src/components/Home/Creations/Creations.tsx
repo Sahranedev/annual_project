@@ -27,8 +27,8 @@ export default async function Creations() {
   const productsData = data.data.Produits;  
 
   return (
-    <section className="py-20 bg-white">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-[1500px] mx-auto">
+    <section className="py-12 sm:py-16 md:py-20 bg-white px-4 sm:px-6 md:px-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 max-w-[1500px] mx-auto">
         {productsData.products.map((product: Product) => (
           <CreationItem key={product.id} product={product} />
         ))}

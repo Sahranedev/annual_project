@@ -1,4 +1,5 @@
 import CategoryItem from "./CategoryItem";
+import DiscoverProductButton from "../DiscoverProductButton";
 
 interface Category {
   id: number
@@ -11,12 +12,12 @@ export default async function Categories() {
   const categoriesData = data.data.Categories;
   
   return (
-    <section className="flex justify-center py-20 bg-pink-50">
-      <ul className="mx-20 w-fit flex flex-col items-center gap-10">
+    <section className="flex justify-center py-10 sm:py-16 md:py-20 bg-orange px-4 sm:px-6 md:px-8">
+      <ul className="w-full max-w-4xl flex flex-col items-center gap-6 sm:gap-8 md:gap-10">
         {categoriesData.categories.map((category: Category) => (
           <CategoryItem key={category.id} category={category} />
         ))}
-        <button className="bg-pink-300 text-white px-4 py-2 rounded-md">Voir la boutique</button>
+        <DiscoverProductButton />
       </ul>
     </section>
   );

@@ -3,7 +3,7 @@ export interface ProductColor {
   color: {
     id: number;
     name: string;
-    hex: string;
+    color: string;
     label: string;
   };
   price: number;
@@ -58,6 +58,7 @@ export interface Category {
 
 export interface Product {
   id: number;
+  documentId: number;
   title: string;
   slug: string;
   price: number;

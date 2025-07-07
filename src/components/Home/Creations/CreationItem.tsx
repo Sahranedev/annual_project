@@ -68,7 +68,7 @@ export default function CreationItem({ product }: { product: Product }) {
               initial={{ scaleY: 0 }}
               animate={{ scaleY: 1 }}
               transition={{ duration: 0.3 }}
-              className="text-white origin-top text-2xl font-bold bg-pink-300 px-2"
+              className="text-white origin-top text-lg sm:text-xl md:text-2xl font-bold bg-orange px-2"
             >
               {product.title}
             </motion.h3>
@@ -76,7 +76,7 @@ export default function CreationItem({ product }: { product: Product }) {
               initial={{ scaleY: 0 }}
               animate={{ scaleY: 1 }}
               transition={{ duration: 0.3, delay: 0.3 }}
-              className='absolute origin-top bg-pink-300 text-white text-sm w-fit text-nowrap px-2'
+              className='absolute origin-top bg-orange text-white text-xs sm:text-sm w-fit text-nowrap px-2'
             >
               {product.categories.map((category) => category.name).join(', ')}
             </motion.span>

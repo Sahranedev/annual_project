@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react'
 
-export default function ScrollingText() {
+export default function ScrollingText({ text }: { text: string }) {
   const [scrollPosition, setScrollPosition] = useState(0);
   const textRef = useRef<HTMLHeadingElement>(null);
 
@@ -22,8 +22,8 @@ export default function ScrollingText() {
   }, []);
   
   return (
-    <h2 ref={textRef} className="text-center text-[170px] font-bold mb-10 text-nowrap text-outline" style={{ transform: `translateX(${-(scrollPosition * 1.5)}px)` }}>
-      créé dans l&apos;embrunais - hautes-alpes - avec amour
+    <h2 ref={textRef} className="text-center text-8xl lg:text-[120px] xl:text-[170px] font-bold mb-6 sm:mb-8 md:mb-10 text-nowrap text-outline" style={{ transform: `translateX(${-(scrollPosition / 1.5)}px)` }}>
+      {text}
     </h2>
   )
 }

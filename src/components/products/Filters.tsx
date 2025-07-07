@@ -15,6 +15,10 @@ interface Category {
     name: string
   }
   name?: string
+  children?: {
+    id: number
+    name: string
+  }[]
 }
 
 interface SearchResult {
@@ -68,7 +72,7 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch('http://localhost:1337/api/categories?filters[type][$eq]=product', {
+        const res = await fetch('http://localhost:1337/api/categories?filters[type][$eq]=product&filters[parent][$null]=true&populate=children', {
           method: 'GET',
           cache: 'no-store',
         })
@@ -97,6 +101,7 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
   )
 
   const handleChangeCategories = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target)
     const id = parseInt(e.target.name, 10)
     const updated = e.target.checked
       ? [...selectedCategories, id]
@@ -150,7 +155,7 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
   }
 
   return (
-    <aside className="w-[300px] space-y-8">
+    <aside className="w-full lg:w-[300px] space-y-6 lg:space-y-8">
       {/* Search */}
       <div className="relative">
         <div className="relative">
@@ -161,10 +166,10 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
             onChange={(e) => setSearchInput(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-pink-300 transition-colors"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-pink-300 transition-colors text-sm sm:text-base"
           />
           <svg
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -178,15 +183,15 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
           </svg>
         </div>
         {isSearchFocused && searchResults.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
             {searchResults.map((product) => (
               <Link
                 key={product.id}
                 href={`/products/${product.slug}`}
-                className="block px-4 py-3 hover:bg-gray-50 transition-colors"
+                className="block px-3 sm:px-4 py-2 sm:py-3 hover:bg-gray-50 transition-colors"
               >
-                <p className="text-gray-800">{product.title}</p>
-                <p className="text-sm text-gray-500">{product.price}€</p>
+                <p className="text-gray-800 text-sm sm:text-base">{product.title}</p>
+                <p className="text-xs sm:text-sm text-gray-500">{product.price}€</p>
               </Link>
             ))}
           </div>
@@ -195,25 +200,25 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
 
       {/* Price Filter */}
       <div>
-        <h3 className="text-lg font-medium mb-4">Prix</h3>
-        <div className="flex gap-4">
+        <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">Prix</h3>
+        <div className="flex gap-3 sm:gap-4">
           <div className="flex-1">
-            <label className="block text-sm text-gray-600 mb-1">Min</label>
+            <label className="block text-xs sm:text-sm text-gray-600 mb-1">Min</label>
             <input
               type="number"
               value={minPrice}
               onChange={(e) => setMinPrice(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-pink-300 transition-colors"
+              className="w-full px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-pink-300 transition-colors text-sm sm:text-base"
               placeholder="0"
             />
           </div>
           <div className="flex-1">
-            <label className="block text-sm text-gray-600 mb-1">Max</label>
+            <label className="block text-xs sm:text-sm text-gray-600 mb-1">Max</label>
             <input
               type="number"
               value={maxPrice}
               onChange={(e) => setMaxPrice(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-pink-300 transition-colors"
+              className="w-full px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-pink-300 transition-colors text-sm sm:text-base"
               placeholder="1000"
             />
           </div>
@@ -222,11 +227,11 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
 
       {/* Categories */}
       <div>
-        <h3 className="text-lg font-medium mb-4">Catégories</h3>
-        <ul className="space-y-3">
-          {categories.map(({ id, attributes, name }) => (
+        <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">Catégories</h3>
+        <ul className="space-y-2 sm:space-y-3">
+          {categories.map(({ id, attributes, name, children }) => (
             <li key={id}>
-              <label className="flex items-center gap-3 cursor-pointer group">
+              <label className="flex items-center gap-2 sm:gap-3 cursor-pointer group mb-2">
                 <div className="relative">
                   <input
                     type="checkbox"
@@ -236,7 +241,7 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
                     onChange={handleChangeCategories}
                     className="peer sr-only"
                   />
-                  <div className="w-5 h-5 border-2 border-gray-300 rounded-sm peer-checked:border-pink-500 peer-checked:bg-pink-500 transition-colors group-hover:border-pink-300">
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-gray-300 rounded-sm peer-checked:border-orange peer-checked:bg-orange transition-colors group-hover:border-orange">
                     <svg
                       className="w-full h-full text-white opacity-0 peer-checked:opacity-100 transition-opacity"
                       fill="none"
@@ -252,10 +257,46 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
                     </svg>
                   </div>
                 </div>
-                <span className="text-gray-700 group-hover:text-pink-500 transition-colors">
+                <span className="text-sm sm:text-base text-gray-700 group-hover:text-orange transition-colors">
                   {attributes?.name ?? name ?? 'Catégorie'}
                 </span>
               </label>
+              <ul className="flex flex-col gap-1 sm:gap-2 pl-4 sm:pl-6 lg:pl-8">
+                {children?.map((childrenItem) => (
+                  <li key={childrenItem.id}>
+                  <label className="flex items-center gap-2 sm:gap-3 cursor-pointer group">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        id={`${childrenItem.id}`}
+                        name={`${childrenItem.id}`}
+                        checked={selectedCategories.includes(childrenItem.id)}
+                        onChange={handleChangeCategories}
+                        className="peer sr-only"
+                      />
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-gray-300 rounded-sm peer-checked:border-orange peer-checked:bg-orange transition-colors group-hover:border-orange">
+                        <svg
+                          className="w-full h-full text-white opacity-0 peer-checked:opacity-100 transition-opacity"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    <span className="text-sm sm:text-base text-gray-700 group-hover:text-orange transition-colors">
+                      {childrenItem.name}
+                    </span>
+                  </label>
+                  </li>
+                ))}
+              </ul>
             </li>
           ))}
         </ul>
@@ -263,7 +304,7 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
 
       <button
         onClick={resetFilters}
-        className="w-full px-4 py-3 text-sm font-medium text-pink-600 border border-pink-200 rounded-lg hover:bg-pink-50 transition-colors"
+        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base font-medium text-orange border border-orange rounded-lg hover:bg-orange hover:text-white transition-colors cursor-pointer"
       >
         Effacer les filtres
       </button>
