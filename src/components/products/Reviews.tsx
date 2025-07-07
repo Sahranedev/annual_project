@@ -19,6 +19,7 @@ interface Review {
   username?: string;
   user: {
     username: string;
+    isVerified: boolean;
   };
 }
 
@@ -60,7 +61,7 @@ export default function Reviews({ productId, productSlug }: ReviewsProps) {
     setGradeCount({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
     try {
       const res = await fetch(
-        `http://localhost:1337/api/reviews?filters[product][slug][$eq]=${productSlug}&populate[img]=true&populate[user]=true&pagination[pageSize]=5&pagination[page]=${currentPage}&sort[0]=grade:${sortOrder}`,
+        `http://localhost:1337/api/reviews?filters[product][id][$eq]=${productId}&populate[img]=true&populate[user]=true&pagination[pageSize]=5&pagination[page]=${currentPage}&sort[0]=grade:${sortOrder}`,
         { cache: 'no-store' }
       );
       if (!res.ok) throw new Error('Échec du chargement des avis');
@@ -233,7 +234,7 @@ export default function Reviews({ productId, productSlug }: ReviewsProps) {
             </div>
             <button
               type="submit"
-              className="bg-orange text-white p-3 sm:p-4 rounded-md hover:bg-orange transition text-sm sm:text-base"
+              className="bg-orange text-white p-3 sm:p-4 rounded-md hover:bg-orange transition text-sm sm:text-base cursor-pointer"
             >
               Publier mon avis
             </button>
@@ -274,7 +275,12 @@ export default function Reviews({ productId, productSlug }: ReviewsProps) {
                     {review.user && review.user.username ? review.user.username[0].toUpperCase() : 'A'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm sm:text-base truncate">{review.user && review.user.username || 'Anonyme'}</div>
+                    <div className="font-semibold text-sm sm:text-base truncate">
+                      {review.user && review.user.username || 'Anonyme'}
+                      {review.user && review.user.isVerified && (
+                        <span className="ml-2 text-xs sm:text-sm text-green-500">Avis vérifié</span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-1">
                       {Array.from({ length: review.grade }, (_, i) => (
                         <span key={i} className="text-yellow-500 text-sm sm:text-base">★</span>

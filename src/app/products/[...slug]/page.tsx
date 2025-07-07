@@ -189,7 +189,7 @@ export default function ProductPage({
               <li className="text-gray-400">/</li>
               <li>
                 <Link 
-                  href={`/products?category=${product.categories[0].parent.id}`}
+                  href={`/products?category=${product.categories[0].parent.slug}`}
                   className="text-gray-500 hover:text-orange transition-colors"
                 >
                   {product.categories[0].parent.name}
@@ -202,7 +202,7 @@ export default function ProductPage({
               <li className="text-gray-400">/</li>
               <li>
                 <Link 
-                  href={`/products?category=${product.categories[0].id}`}
+                  href={`/products?category=${product.categories[0].slug}`}
                   className="text-gray-500 hover:text-orange transition-colors"
                 >
                   {product.categories[0].name}
