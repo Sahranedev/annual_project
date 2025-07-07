@@ -39,7 +39,7 @@ export default function RootLayout({
         className={`${aboreto.variable} ${dmSans.variable} ${allura.variable} antialiased min-h-screen flex flex-col font-dm-sans`}
       >
         <Header />
-        <main className="flex-grow">{children}</main>
+        <main className="flex-grow mb-20">{children}</main>
         <Footer />
         <Toaster />
       </body>

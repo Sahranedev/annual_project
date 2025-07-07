@@ -1,23 +1,17 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-interface FiltersProps {
-  categoryParam?: string
-  searchParam?: string
-}
-
 interface Category {
   id: number
-  attributes?: {
-    name: string
-  }
   name?: string
+  slug?: string
   children?: {
     id: number
     name: string
+    slug: string
   }[]
 }
 
@@ -50,13 +44,13 @@ const updateMultipleSearchParams = (
   router.push(`/products${query ? `?${query}` : ''}`)
 }
 
-export default function Filters({ categoryParam, searchParam }: FiltersProps) {
+export default function Filters() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
   const [categories, setCategories] = useState<Category[]>([])
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([])
-  const [searchInput, setSearchInput] = useState(searchParam || '')
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [searchInput, setSearchInput] = useState('')
   const [minPrice, setMinPrice] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
@@ -78,6 +72,8 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
         })
         const data = await res.json()
         setCategories(data.data)
+        console.log(data.data);
+        
       } catch (err) {
         console.error('Error fetching categories', err)
       }
@@ -85,30 +81,49 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
     fetchCategories()
   }, [])
 
-  // Sync selected categories from param
+  // Sync selected categories from params
   useEffect(() => {
-    if (categoryParam) {
-      const parsed = categoryParam.split(',').map((id) => parseInt(id, 10))
-      setSelectedCategories(parsed)
-    }
-  }, [categoryParam])
+    const categoryParams: string[] = []
+    const existingParams = Array.from(searchParams.entries())
+    
+    existingParams.forEach(([key, value]) => {
+      if (key === 'category') {
+        categoryParams.push(value)
+      }
+    })
+    
+    setSelectedCategories(categoryParams)
+  }, [searchParams])
 
-  const updateSearchParam = useCallback(
-    (key: string, value: string | null) => {
-      updateMultipleSearchParams({ [key]: value }, searchParams, router)
-    },
-    [searchParams, router]
-  )
+
 
   const handleChangeCategories = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log(e.target)
-    const id = parseInt(e.target.name, 10)
+    const slug = e.target.name
     const updated = e.target.checked
-      ? [...selectedCategories, id]
-      : selectedCategories.filter((catId) => catId !== id)
+      ? [...selectedCategories, slug]
+      : selectedCategories.filter((catSlug) => catSlug !== slug)
 
     setSelectedCategories(updated)
-    updateSearchParam('category', updated.length ? updated.join(',') : null)
+    
+    // Créer de nouveaux paramètres de recherche
+    const newParams = new URLSearchParams(searchParams.toString())
+    
+    // Supprimer tous les paramètres de catégorie existants
+    const existingParams = Array.from(newParams.entries())
+    existingParams.forEach(([key]) => {
+      if (key === 'category') {
+        newParams.delete(key)
+      }
+    })
+    
+    // Ajouter les nouvelles catégories sélectionnées
+    updated.forEach((catSlug) => {
+      newParams.append('category', catSlug)
+    })
+    
+    const query = newParams.toString()
+    router.push(`/products${query ? `?${query}` : ''}`)
   }
 
   // Debounced min/max price update
@@ -229,16 +244,17 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
       <div>
         <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">Catégories</h3>
         <ul className="space-y-2 sm:space-y-3">
-          {categories.map(({ id, attributes, name, children }) => (
+          {categories.map(({ id, name, slug, children }) => (
             <li key={id}>
               <label className="flex items-center gap-2 sm:gap-3 cursor-pointer group mb-2">
                 <div className="relative">
                   <input
                     type="checkbox"
-                    id={String(id)}
-                    name={String(id)}
-                    checked={selectedCategories.includes(id)}
+                    id={String(slug)}
+                    name={String(slug)}
+                    checked={selectedCategories.includes(slug || '')}
                     onChange={handleChangeCategories}
+                    value={slug}
                     className="peer sr-only"
                   />
                   <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-gray-300 rounded-sm peer-checked:border-orange peer-checked:bg-orange transition-colors group-hover:border-orange">
@@ -258,7 +274,7 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
                   </div>
                 </div>
                 <span className="text-sm sm:text-base text-gray-700 group-hover:text-orange transition-colors">
-                  {attributes?.name ?? name ?? 'Catégorie'}
+                  {name}
                 </span>
               </label>
               <ul className="flex flex-col gap-1 sm:gap-2 pl-4 sm:pl-6 lg:pl-8">
@@ -268,9 +284,9 @@ export default function Filters({ categoryParam, searchParam }: FiltersProps) {
                     <div className="relative">
                       <input
                         type="checkbox"
-                        id={`${childrenItem.id}`}
-                        name={`${childrenItem.id}`}
-                        checked={selectedCategories.includes(childrenItem.id)}
+                        id={`${childrenItem.slug}`}
+                        name={`${childrenItem.slug}`}
+                        checked={selectedCategories.includes(childrenItem.slug)}
                         onChange={handleChangeCategories}
                         className="peer sr-only"
                       />

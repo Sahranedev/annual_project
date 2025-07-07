@@ -4,10 +4,16 @@ import Filters from "@/components/products/Filters";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { motion } from "motion/react";
+import { useSearchParams } from "next/navigation";
 
 interface Category {
   id: number;
   name: string;
+  slug: string;
+  parent: {
+    slug: string;
+  };
 }
 
 interface Product {
@@ -26,26 +32,25 @@ interface Product {
   categories: Category[];
 }
 
-interface PageProps {
-  searchParams?: {
-    category?: string;
-    search?: string;
-    minPrice?: string;
-    maxPrice?: string;
-  };
-}
-
-export default function Page({ searchParams }: PageProps) {
+export default function Page() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const { category, minPrice, maxPrice } = searchParams ?? {};
+  const searchParams = useSearchParams()
+  const minPrice = searchParams.get('minPrice')
+  const maxPrice = searchParams.get('maxPrice')
+  const category = searchParams.getAll('category')
 
-  let url = "http://localhost:1337/api/products?populate=*";
+  let url = "http://localhost:1337/api/products?populate=*&populate=categories&populate=categories.parent&populate=images";
 
-  if (category) {
-    const categoryArray = category
-      .split(",")
-      .map((id) => `filters[categories][id][$in]=${id}`);
-    url += `&${categoryArray.join("&")}`;
+  // Récupérer toutes les catégories depuis les paramètres de recherche
+  const categoryParams: string[] = [];
+  if (category && category.length > 0) {
+    console.log(category);
+    categoryParams.push(...category);
+  }
+
+  if (categoryParams.length > 0) {
+    const categoryFilters = categoryParams.map((slug) => `filters[categories][slug][$in]=${slug}`);
+    url += `&${categoryFilters.join("&")}`;
   }
 
   if (minPrice) {
@@ -60,6 +65,8 @@ export default function Page({ searchParams }: PageProps) {
 
   // Fetch products
   useEffect(() => {
+    console.log(url);
+    
     const fetchProducts = async () => {
       try {
         const res = await fetch(url, { method: "GET", cache: "no-store" });
@@ -88,16 +95,9 @@ export default function Page({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero section - responsive height */}
-      <div className="w-full h-48 sm:h-64 md:h-80 lg:h-96 bg-gray-100 mb-6 sm:mb-8 md:mb-12 relative">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif px-4 text-center">Boutique</h1>
-        </div>
-      </div>
-      
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 mt-10">
         {/* Mobile filters toggle */}
-        <div className="mb-6">
+        <div className="mb-6 lg:hidden block">
           <button 
             onClick={() => setIsFiltersOpen(true)}
             className="w-full px-4 py-3 bg-orange text-white rounded-lg font-medium flex items-center justify-center gap-2 cursor-pointer"
@@ -125,13 +125,18 @@ export default function Page({ searchParams }: PageProps) {
                 </button>
               </div>
               <div className="p-4">
-                <Filters categoryParam={category} />
+                <Filters />
               </div>
             </div>
           </div>
         )}
         
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
+          {/* Desktop Filters */}
+          <div className="hidden lg:block">
+            <Filters />
+          </div>
+          
           <main className="flex-1">
             <div className="mb-4 sm:mb-6 lg:mb-8 flex justify-between items-center">
               <p className="text-sm sm:text-base text-gray-600">{products.length} produits</p>
@@ -142,67 +147,120 @@ export default function Page({ searchParams }: PageProps) {
             )}
             
             {/* Responsive grid */}
-            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              {products.map((product) => (
-                <Link
+            <motion.ul 
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1,
+                    delayChildren: 0.2
+                  }
+                }
+              }}
+            >
+              {products.map((product, index) => (
+                <motion.li
                   key={product.id}
-                  href={`/products/${product.slug || product.id}`}
-                  className="cursor-pointer"
+                  variants={{
+                    hidden: { 
+                      opacity: 0, 
+                      y: 20,
+                      scale: 0.95
+                    },
+                    visible: { 
+                      opacity: 1, 
+                      y: 0,
+                      scale: 1,
+                      transition: {
+                        duration: 0.5,
+                        ease: "easeOut"
+                      }
+                    }
+                  }}
                 >
-                  <li className="group">
-                    <div className="relative aspect-square mb-3 sm:mb-4 overflow-hidden rounded-lg">
-                      {product.images?.[0]?.formats?.thumbnail?.url && (
-                        <Image
-                          src={`http://localhost:1337${product.images[0].formats.large.url}`}
-                          alt={product.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      )}
-                      {product.Promotion && (
-                        <span className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-pink-500 text-white px-2 sm:px-3 py-1 text-xs sm:text-sm">
-                          En promo !
-                        </span>
-                      )}
-                      <button className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 bg-orange text-white py-2 px-3 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center cursor-pointer text-sm sm:text-base">
-                        Ajouter au panier
-                      </button>
-                    </div>
-                    <div className="text-center px-2">
-                      <p className="text-xs sm:text-sm text-gray-500 mb-1">
-                        {product.categories?.map((category, index) => (
-                          <span key={category.id}>
-                            {category.name}
-                            {index !== product.categories.length - 1 && " / "}
-                          </span>
-                        ))}
-                      </p>
-                      <h2 className="text-sm sm:text-base lg:text-lg font-medium mb-1 sm:mb-2 line-clamp-2">
-                        {product.title}
-                      </h2>
-                      <p className="text-sm sm:text-base lg:text-lg">
-                        {product.Promotion ? (
-                          <>
-                            <span className="line-through text-gray-500">
-                              {product.price}€
-                            </span>
-                            <span className="ml-2 text-pink-500 font-medium">
-                              {(
-                                product.price -
-                                product.price * (product.discountPercent / 100)
-                              ).toFixed(2)}
-                              €
-                            </span>
-                          </>
-                        ) : (
-                          <span>{product.price}€</span>
+                  <Link
+                    href={`/products/${product.categories[0].parent ? product.categories[0].parent.slug + '/' : ''}${product.categories[0].slug}/${product.slug || product.id}`}
+                    className="cursor-pointer block"
+                  >
+                    <div className="group">
+                      <motion.div 
+                        className="relative aspect-square mb-3 sm:mb-4 overflow-hidden rounded-lg"
+                        whileHover={{ 
+                          scale: 1.02,
+                          transition: { duration: 0.2 }
+                        }}
+                      >
+                        {product.images?.[0]?.formats?.thumbnail?.url && (
+                          <Image
+                            src={`http://localhost:1337${product.images[0].formats.large.url}`}
+                            alt={product.title}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
                         )}
-                      </p>
+                        {product.Promotion && (
+                          <motion.span 
+                            className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-pink-500 text-white px-2 sm:px-3 py-1 text-xs sm:text-sm"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.3 + index * 0.1, type: "spring", stiffness: 200 }}
+                          >
+                            En promo !
+                          </motion.span>
+                        )}
+                        <motion.button 
+                          className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 bg-orange text-white py-2 px-3 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center cursor-pointer text-sm sm:text-base"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Ajouter au panier
+                        </motion.button>
+                      </motion.div>
+                      <motion.div 
+                        className="text-center px-2"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 + index * 0.1, duration: 0.3 }}
+                      >
+                        <p className="text-xs sm:text-sm text-gray-500 mb-1">
+                          {product.categories?.map((category, index) => (
+                            <span key={category.id}>
+                              {category.name}
+                              {index !== product.categories.length - 1 && " / "}
+                            </span>
+                          ))}
+                        </p>
+                        <h2 className="text-sm sm:text-base lg:text-lg font-medium mb-1 sm:mb-2 line-clamp-2">
+                          {product.title}
+                        </h2>
+                        <p className="text-sm sm:text-base lg:text-lg">
+                          {product.Promotion ? (
+                            <>
+                              <span className="line-through text-gray-500">
+                                {product.price}€
+                              </span>
+                              <span className="ml-2 text-pink-500 font-medium">
+                                {(
+                                  product.price -
+                                  product.price * (product.discountPercent / 100)
+                                ).toFixed(2)}
+                                €
+                              </span>
+                            </>
+                          ) : (
+                            <span>{product.price}€</span>
+                          )}
+                        </p>
+                      </motion.div>
                     </div>
-                  </li>
-                </Link>
+                  </Link>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
           </main>
         </div>
       </div>

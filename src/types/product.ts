@@ -44,6 +44,11 @@ export interface ProductCategory {
   id: number;
   name: string;
   slug: string;
+  parent: {
+    id: number;
+    name: string;
+    slug: string;
+  };
 }
 
 export interface ProductInformation {

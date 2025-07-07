@@ -9,7 +9,11 @@ export default async function Hero() {
   const heroData = data.data;
 
   const { Title, description, image } = heroData.HeroSection;
+  console.log("image", image);
+
   const imageUrl = getImageUrl(image);
+
+  console.log("imageUrl", imageUrl);
 
   return (
     <section className="relative h-screen bg-cover bg-center">

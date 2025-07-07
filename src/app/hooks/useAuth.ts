@@ -17,7 +17,7 @@ export function useAuth() {
       try {
         // Récupérer les informations de base de l'utilisateur
         const userResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}/api/users/me`,
+          `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337/"}api/users/me`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
