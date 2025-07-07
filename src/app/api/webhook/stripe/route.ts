@@ -83,11 +83,78 @@ async function handleCheckoutSessionCompleted(
   console.log("Devise:", session.currency);
   console.log("Statut de paiement:", session.payment_status);
 
-  // Ici, vous pouvez implémenter la logique pour:
-  // 1. Mettre à jour le statut de la commande dans votre base de données
-  // 2. Envoyer un e-mail de confirmation au client
-  // 3. Déclencher la préparation de la commande
-  // 4. Etc.
+  if (session.customer_email) {
+    try {
+      console.log(
+        `Mise à jour de isVerified pour l'utilisateur: ${session.customer_email}`
+      );
+
+      const BACKEND_URL =
+        process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+
+      const apiToken = process.env.NEXT_PUBLIC_STRAPI_API_TOKEN;
+
+      if (!apiToken) {
+        throw new Error("Token API Strapi non configuré");
+      }
+
+      const userResponse = await fetch(
+        `${BACKEND_URL}/api/users?filters[email]=${encodeURIComponent(session.customer_email)}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${apiToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const userData = await userResponse.json();
+
+      console.log("Réponse de recherche utilisateur:", userData);
+
+      if (!userResponse.ok) {
+        throw new Error(
+          `Erreur lors de la recherche de l'utilisateur: ${userData.error?.message || "Erreur inconnue"}`
+        );
+      }
+
+      if (userData && userData.length > 0) {
+        const userId = userData[0].id;
+
+        const updateResponse = await fetch(
+          `${BACKEND_URL}/api/users/${userId}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${apiToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              isVerified: true,
+            }),
+          }
+        );
+
+        if (!updateResponse.ok) {
+          const errorData = await updateResponse.json();
+          throw new Error(
+            `Erreur lors de la mise à jour de l'utilisateur: ${errorData.error?.message || "Erreur inconnue"}`
+          );
+        }
+
+        console.log(`Utilisateur ${userId} marqué comme vérifié avec succès`);
+      } else {
+        console.log(
+          `Aucun utilisateur trouvé avec l'email: ${session.customer_email}`
+        );
+      }
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de isVerified:", error);
+    }
+  }
+
+  console.log("Traitement de la session de paiement terminé");
 }
 
 async function handlePaymentIntentSucceeded(

@@ -61,11 +61,9 @@ export default function CheckoutButton({
         );
       }
 
-      // Rediriger vers Stripe Checkout
       if (data.url) {
         window.location.href = data.url;
       } else {
-        // Redirection alternative si l'URL n'est pas fournie
         const stripe = await getStripeClient();
         if (!stripe) {
           throw new Error("Impossible de charger Stripe");
