@@ -42,6 +42,7 @@ export default async function Page() {
         method: "GET",
         cache: "no-store",
     });
+    console.log(res)
 
     if (!res.ok) {
         throw new Error("Failed to fetch data");
