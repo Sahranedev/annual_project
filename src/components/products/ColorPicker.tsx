@@ -13,9 +13,9 @@ export default function ColorPicker({ colors, select }: ColorProps) {
         <button
           key={color.id}
           className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-gray-200 cursor-pointer hover:scale-110 transition-transform`}
-          style={{ backgroundColor: color.color.color  }}
+          style={{ backgroundColor: color?.color?.color }}
           onClick={() => select(color.id)}
-          title={color.color.label}
+          title={color?.color?.label}
         ></button>
       ))}
     </div>

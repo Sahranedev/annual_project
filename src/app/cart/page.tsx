@@ -3,14 +3,12 @@
 import { useEffect } from "react";
 import { useCartStore } from "../store/cartStore";
 import Link from "next/link";
-import Image from "next/image";
-import { FiTrash2, FiShoppingBag } from "react-icons/fi";
+import { FiShoppingBag } from "react-icons/fi";
 import CheckoutButton from "@/components/checkout/CheckoutButton";
 import PromoCode from "@/components/cart/PromoCode";
 import { formatPrice } from "@/app/utils";
 import SuggestedProducts from "@/components/cart/SuggestedProducts";
 import CartItem from "@/components/cart/CartItem";
-import { FaRegTrashAlt } from "react-icons/fa";
 
 /* J'ai fait le suggest product en dur pour l'instant parce que je ne sais pas sur quel algo se base la prof pour le faire */
 const dummySuggestedProducts = [

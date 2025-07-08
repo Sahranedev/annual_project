@@ -27,21 +27,27 @@ export default function ProductPage({
 }) {
   const router = useRouter();
   const { slug } = use(params);
-  
+
   if (slug.length < 1 || slug.length > 3) {
-    notFound()
+    notFound();
   }
-  const slugString = slug ? slug.join('/') : '';
-  
+  const slugString = slug ? slug.join("/") : "";
+
   // Analyser la structure de l'URL
   const slugParts = slug || [];
   const isThreeLevels = slugParts.length === 3; // /category/subcategory/product
-  const isTwoLevels = slugParts.length === 2;   // /subcategory/product
-  const isOneLevel = slugParts.length === 1;    // /product
-  
+  const isTwoLevels = slugParts.length === 2; // /subcategory/product
+  const isOneLevel = slugParts.length === 1; // /product
+
   // Extraire les parties selon la structure
-  const productSlug = isThreeLevels ? slugParts[2] : isTwoLevels ? slugParts[1] : isOneLevel ? slugParts[0] : null;
-  
+  const productSlug = isThreeLevels
+    ? slugParts[2]
+    : isTwoLevels
+      ? slugParts[1]
+      : isOneLevel
+        ? slugParts[0]
+        : null;
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +63,6 @@ export default function ProductPage({
     const fetchProduct = async () => {
       setLoading(true);
       try {
-
         const res = await fetch(
           `http://localhost:1337/api/products?filters[slug][$eq]=${productSlug}&populate=categories&populate=categories.parent&populate=Couleurs.color&populate=Taille&populate=Pompom&populate=Informations&populate=images`,
           { cache: "no-store" }
@@ -149,18 +154,23 @@ export default function ProductPage({
     toast.success(`${product.title} ajouté au panier`);
   };
 
-  if (loading) return <div className="text-center py-6 sm:py-10">Chargement...</div>;
+  if (loading)
+    return <div className="text-center py-6 sm:py-10">Chargement...</div>;
   if (error)
-    return <div className="text-center text-red-500 py-6 sm:py-10">{error}</div>;
+    return (
+      <div className="text-center text-red-500 py-6 sm:py-10">{error}</div>
+    );
   if (!product)
     return (
-      <div className="text-center text-red-500 py-6 sm:py-10">Produit non trouvé</div>
+      <div className="text-center text-red-500 py-6 sm:py-10">
+        Produit non trouvé
+      </div>
     );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
       {/* Breadcrumb */}
-      <motion.nav 
+      <motion.nav
         className="mb-6 sm:mb-8"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -168,8 +178,8 @@ export default function ProductPage({
       >
         <ol className="flex items-center space-x-2 text-sm sm:text-base">
           <li>
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="text-gray-500 hover:text-orange transition-colors"
             >
               Accueil
@@ -177,8 +187,8 @@ export default function ProductPage({
           </li>
           <li className="text-gray-400">/</li>
           <li>
-            <Link 
-              href="/products" 
+            <Link
+              href="/products"
               className="text-gray-500 hover:text-orange transition-colors"
             >
               Produits
@@ -188,7 +198,7 @@ export default function ProductPage({
             <>
               <li className="text-gray-400">/</li>
               <li>
-                <Link 
+                <Link
                   href={`/products?category=${product.categories[0].parent.slug}`}
                   className="text-gray-500 hover:text-orange transition-colors"
                 >
@@ -201,7 +211,7 @@ export default function ProductPage({
             <>
               <li className="text-gray-400">/</li>
               <li>
-                <Link 
+                <Link
                   href={`/products?category=${product.categories[0].slug}`}
                   className="text-gray-500 hover:text-orange transition-colors"
                 >
@@ -217,14 +227,14 @@ export default function ProductPage({
         </ol>
       </motion.nav>
 
-      <motion.div 
+      <motion.div
         className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         {/* Left side - Images */}
-        <motion.div 
+        <motion.div
           className="space-y-3 sm:space-y-4"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -243,35 +253,37 @@ export default function ProductPage({
           </div>
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
             {product?.images.length > 1 &&
-              product?.images?.slice(0, 5).map((image: ProductImage, index: number) => (
-                <motion.button
-                  key={image.id}
-                  className={`relative aspect-square rounded-lg overflow-hidden ${imgSelected === `http://localhost:1337${image.formats.thumbnail.url}` ? "ring-2 ring-pink-400" : ""}`}
-                  onClick={() =>
-                    setImgSelected(
-                      `http://localhost:1337${image.formats.thumbnail.url}`
-                    )
-                  }
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Image
-                    src={`http://localhost:1337${image.formats.thumbnail.url}`}
-                    alt={product.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 25vw, (max-width: 1024px) 10vw, 8vw"
-                  />
-                </motion.button>
-              ))}
+              product?.images
+                ?.slice(0, 5)
+                .map((image: ProductImage, index: number) => (
+                  <motion.button
+                    key={image.id}
+                    className={`relative aspect-square rounded-lg overflow-hidden ${imgSelected === `http://localhost:1337${image.formats.thumbnail.url}` ? "ring-2 ring-pink-400" : ""}`}
+                    onClick={() =>
+                      setImgSelected(
+                        `http://localhost:1337${image.formats.thumbnail.url}`
+                      )
+                    }
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Image
+                      src={`http://localhost:1337${image.formats.thumbnail.url}`}
+                      alt={product.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 25vw, (max-width: 1024px) 10vw, 8vw"
+                    />
+                  </motion.button>
+                ))}
           </div>
         </motion.div>
 
         {/* Right side - Product Info */}
-        <motion.div 
+        <motion.div
           className="space-y-4 sm:space-y-6"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -287,12 +299,17 @@ export default function ProductPage({
             </h1>
             <div className="flex flex-wrap gap-2 mb-3 sm:mb-4">
               {product.categories?.map((category: ProductCategory) => (
-                <span key={category.id} className="text-xs sm:text-sm text-gray-500">
+                <span
+                  key={category.id}
+                  className="text-xs sm:text-sm text-gray-500"
+                >
                   {category.name}
                 </span>
               ))}
             </div>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">{product.shortDescription}</p>
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
+              {product.shortDescription}
+            </p>
             <div className="flex items-baseline gap-2 mb-4 sm:mb-6">
               <span
                 className={`text-xl sm:text-2xl font-semibold ${product.Promotion ? "line-through text-gray-400" : "text-gray-900"}`}
@@ -309,7 +326,7 @@ export default function ProductPage({
 
           {/* Color Selection */}
           {product.Couleurs?.length > 0 && (
-            <motion.div 
+            <motion.div
               className="space-y-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -322,7 +339,7 @@ export default function ProductPage({
                 {selectedColor && (
                   <span className="text-xs sm:text-sm text-gray-500">
                     {
-                      product.Couleurs.find(
+                      product?.Couleurs?.find(
                         (c: ProductColor) => c.id === selectedColor
                       )?.color.label
                     }
@@ -335,7 +352,7 @@ export default function ProductPage({
 
           {/* Size Selection */}
           {product.Taille?.length > 0 && (
-            <motion.div 
+            <motion.div
               className="space-y-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -366,7 +383,7 @@ export default function ProductPage({
 
           {/* Pompom Selection */}
           {product.Pompom && product.Pompom.enabled && (
-            <motion.div 
+            <motion.div
               className="space-y-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -419,7 +436,7 @@ export default function ProductPage({
           )}
 
           {/* Gift Wrapping */}
-          <motion.div 
+          <motion.div
             className="bg-gray-50 p-3 sm:p-4 rounded-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -438,7 +455,7 @@ export default function ProductPage({
           </motion.div>
 
           {/* Add to Cart */}
-          <motion.div 
+          <motion.div
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -466,13 +483,13 @@ export default function ProductPage({
       </motion.div>
 
       {/* Product Details */}
-      <motion.div 
+      <motion.div
         className="mt-12 sm:mt-16 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 1.0 }}
       >
-        <motion.div 
+        <motion.div
           className="lg:col-span-2 prose prose-pink max-w-none prose-sm sm:prose-base"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -496,7 +513,9 @@ export default function ProductPage({
                     <dt className="text-xs sm:text-sm font-medium text-gray-500">
                       {info.label}
                     </dt>
-                    <dd className="text-xs sm:text-sm text-gray-900">{info.value}</dd>
+                    <dd className="text-xs sm:text-sm text-gray-900">
+                      {info.value}
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -506,7 +525,7 @@ export default function ProductPage({
       </motion.div>
 
       {/* Reviews & Suggested Articles */}
-      <motion.div 
+      <motion.div
         className="mt-12 sm:mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const strapiRes = await fetch(`${process.env.STRAPI_URL}api/auth/local`, {
+  const strapiRes = await fetch(`${process.env.STRAPI_URL}/api/auth/local`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
