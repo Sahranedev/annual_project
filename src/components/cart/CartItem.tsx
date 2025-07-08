@@ -12,6 +12,7 @@ type CartItemProps = {
   price: number;
   thumbnail: string;
   quantity: number;
+  documentId: number;
 };
 
 export default function CartItem({
@@ -61,6 +62,7 @@ export default function CartItem({
           <input
             min="1"
             value={itemQuantity}
+            onChange={(e) => handleQuantityChange(Number(e.target.value))}
             className="w-12 border-y border-gray-300 py-1 text-center"
           />
           <button

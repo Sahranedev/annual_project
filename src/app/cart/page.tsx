@@ -22,11 +22,6 @@ export default function CartPage() {
 
   console.log(items);
 
-  const handleQuantityChange = (id: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    updateQuantity(id, newQuantity);
-  };
-
   const discountAmount = promoCode
     ? (subtotal() * promoCode.discount) / 100
     : 0;
