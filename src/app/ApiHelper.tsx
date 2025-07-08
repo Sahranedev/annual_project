@@ -15,7 +15,11 @@ const ApiHelper = async (
     if (!body) return null;
 
     // Pour les endpoints d'utilisateurs ou endpoints spécifiques Strapi, la structure est différente
-    if (route.startsWith("users/") || route.startsWith("user-addresses")) {
+    if (
+      route.startsWith("users/") ||
+      route.startsWith("user-addresses") ||
+      route.startsWith("user-addresse")
+    ) {
       return JSON.stringify({ data: body });
     }
 
@@ -33,6 +37,11 @@ const ApiHelper = async (
       `http://localhost:1337/api/${route}`,
       requestOptions
     );
+
+    // Pour DELETE, ne pas essayer de parser le JSON si pas de contenu
+    if (method === "DELETE" && response.status === 204) {
+      return { data: true }; // Retourner une valeur par défaut pour indiquer succès
+    }
 
     const responseData = await response.json();
 

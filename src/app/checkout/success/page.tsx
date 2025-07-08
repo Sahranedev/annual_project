@@ -215,9 +215,6 @@ export default function CheckoutSuccessPage() {
                           </span>
                         </div>
                       </div>
-                      <div className="font-medium ml-4">
-                        {(item.amount_total / 100).toFixed(2)} €
-                      </div>
                     </div>
                   ))}
                 </div>

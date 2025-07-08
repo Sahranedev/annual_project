@@ -9,6 +9,8 @@ import CheckoutButton from "@/components/checkout/CheckoutButton";
 import PromoCode from "@/components/cart/PromoCode";
 import { formatPrice } from "@/app/utils";
 import SuggestedProducts from "@/components/cart/SuggestedProducts";
+import CartItem from "@/components/cart/CartItem";
+import { FaRegTrashAlt } from "react-icons/fa";
 
 /* J'ai fait le suggest product en dur pour l'instant parce que je ne sais pas sur quel algo se base la prof pour le faire */
 const dummySuggestedProducts = [
@@ -83,21 +85,27 @@ export default function CartPage() {
                 <tr>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3  text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     Produit
                   </th>
                   <th
+                    scope="cole"
+                    className="px-6 py-3  text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Prix
+                  </th>
+                  <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     Quantité
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3  text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Prix
+                    Prix total
                   </th>
                   <th scope="col" className="relative px-6 py-3">
                     <span className="sr-only">Actions</span>
@@ -106,60 +114,7 @@ export default function CartPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {items.map((item) => (
-                  <tr key={item.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                          <Image
-                            src={item.thumbnail}
-                            alt={item.title}
-                            width={64}
-                            height={64}
-                            className="h-full w-full object-cover object-center"
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {item.title}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center border rounded-md">
-                        <button
-                          onClick={() =>
-                            handleQuantityChange(item.id, item.quantity - 1)
-                          }
-                          className="px-3 py-1 text-gray-600 hover:bg-gray-100"
-                        >
-                          -
-                        </button>
-                        <span className="px-3 py-1 text-gray-800">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() =>
-                            handleQuantityChange(item.id, item.quantity + 1)
-                          }
-                          className="px-3 py-1 text-gray-600 hover:bg-gray-100"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      {(item.price * item.quantity).toFixed(2)} €
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => remove(item.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <FiTrash2 className="h-5 w-5" />
-                      </button>
-                    </td>
-                  </tr>
+                  <CartItem key={item.id} {...item} />
                 ))}
               </tbody>
             </table>
