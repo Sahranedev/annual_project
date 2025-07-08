@@ -7,6 +7,7 @@ type CartItem = {
   price: number;
   thumbnail: string;
   quantity: number;
+  documentId: number;
 };
 
 type PromoCode = {

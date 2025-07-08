@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState, use } from "react";
-import { notFound, useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import { motion } from "motion/react";
 import ColorPicker from "@/components/products/ColorPicker";
@@ -25,7 +25,6 @@ export default function ProductPage({
 }: {
   params: Promise<{ slug: string[] }>;
 }) {
-  const router = useRouter();
   const { slug } = use(params);
   
   if (slug.length < 1 || slug.length > 3) {
@@ -86,7 +85,7 @@ export default function ProductPage({
     };
 
     fetchProduct();
-  }, [slug, productSlug, router]);
+  }, [slug, productSlug]);
 
   const selectColor = (colorId: number) => {
     setSelectedColor(colorId);
@@ -138,6 +137,7 @@ export default function ProductPage({
       id: product.id,
       title: product.title,
       price: finalPrice,
+      documentId: product.documentId,
       thumbnail:
         imgSelected ||
         `http://localhost:1337${product.images?.[0]?.formats?.thumbnail?.url}`,
