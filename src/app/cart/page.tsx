@@ -1,37 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
 import { useCartStore } from "../store/cartStore";
 import Link from "next/link";
 import { FiShoppingBag } from "react-icons/fi";
 import CheckoutButton from "@/components/checkout/CheckoutButton";
 import PromoCode from "@/components/cart/PromoCode";
 import { formatPrice } from "@/app/utils";
-import SuggestedProducts from "@/components/cart/SuggestedProducts";
+import SuggestedProduct from "@/components/products/SuggestedProduct";
 import CartItem from "@/components/cart/CartItem";
-
-/* J'ai fait le suggest product en dur pour l'instant parce que je ne sais pas sur quel algo se base la prof pour le faire */
-const dummySuggestedProducts = [
-  {
-    id: 3,
-    title: "Produit suggéré 1",
-    price: 19.99,
-    thumbnail: "https://via.placeholder.com/150",
-    quantity: 1,
-  },
-  {
-    id: 4,
-    title: "Produit suggéré 2",
-    price: 29.99,
-    thumbnail: "https://via.placeholder.com/150",
-    quantity: 1,
-  },
-];
 
 export default function CartPage() {
   const {
     items,
-    setSuggestedProducts,
     remove,
     updateQuantity,
     subtotal,
@@ -40,9 +20,7 @@ export default function CartPage() {
     promoCode,
   } = useCartStore();
 
-  useEffect(() => {
-    setSuggestedProducts(dummySuggestedProducts);
-  }, [setSuggestedProducts]);
+  console.log(items);
 
   const handleQuantityChange = (id: number, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -118,7 +96,7 @@ export default function CartPage() {
             </table>
           </div>
 
-          <SuggestedProducts />
+          <SuggestedProduct productId={items[0].documentId.toString()} />
         </div>
 
         <div className="lg:col-span-1">
