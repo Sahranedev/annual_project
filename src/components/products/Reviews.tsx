@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import React, { useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useAuthStore } from "@/app/store/authStore";
 
 interface ReviewsProps {
   productId: number;
@@ -17,6 +19,7 @@ interface Review {
   username?: string;
   user: {
     username: string;
+    isVerified: boolean;
   };
 }
 
@@ -35,7 +38,7 @@ interface ReviewPayload {
 }
 
 export default function Reviews({ productId, productSlug }: ReviewsProps) {
-  const token = localStorage.getItem('token')
+  const { token } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { register, handleSubmit, reset, setValue } = useForm<FormValues>();
   const [rating, setRating] = useState(0);
@@ -58,7 +61,7 @@ export default function Reviews({ productId, productSlug }: ReviewsProps) {
     setGradeCount({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
     try {
       const res = await fetch(
-        `http://localhost:1337/api/reviews?filters[product][slug][$eq]=${productSlug}&populate[img]=true&populate[user]=true&pagination[pageSize]=5&pagination[page]=${currentPage}&sort[0]=grade:${sortOrder}`,
+        `http://localhost:1337/api/reviews?filters[product][id][$eq]=${productId}&populate[img]=true&populate[user]=true&pagination[pageSize]=5&pagination[page]=${currentPage}&sort[0]=grade:${sortOrder}`,
         { cache: 'no-store' }
       );
       if (!res.ok) throw new Error('Échec du chargement des avis');
@@ -116,7 +119,7 @@ export default function Reviews({ productId, productSlug }: ReviewsProps) {
 
       if (imageId) {
         payload.data.img = imageId;
-      }
+      }      
 
       const createRes = await fetch(
         "http://localhost:1337/api/reviews",
@@ -124,7 +127,7 @@ export default function Reviews({ productId, productSlug }: ReviewsProps) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify(payload),
         }
@@ -152,152 +155,186 @@ export default function Reviews({ productId, productSlug }: ReviewsProps) {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Avis</h2>
-      <p className="text-sm text-gray-500 mb-4">
-        Note moyenne : {averageGrade} ({totalReviews} avis)
-      </p>
-      <div className="flex flex-col gap-2 mb-8">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <div key={star} className="flex items-center gap-1">
-            {[1, 2, 3, 4, 5].map((index) => (
-              <span key={index} className={`${index <= star ? 'text-yellow-500' : 'text-gray-300'}`}>★</span>
+    <div className="p-2 sm:p-4 lg:p-6">
+      <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-black font-aboreto">Avis clients</h2>
+      
+      {/* Rating Summary */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900">{averageGrade.toFixed(1)}</div>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span key={star} className={`text-xl sm:text-2xl lg:text-3xl ${star <= Math.round(averageGrade) ? 'text-yellow-500' : 'text-gray-300'}`}>★</span>
             ))}
-            <span className="text-gray-500">{gradeCount[star as keyof typeof gradeCount]}</span>
+          </div>
+          <p className="text-xs sm:text-sm text-gray-500">Basé sur {totalReviews} avis</p>
+        </div>
+      </div>
+
+      {/* Rating Distribution */}
+      <div className="flex flex-col gap-2 mb-6 sm:mb-8">
+        {[5, 4, 3, 2, 1].map((star) => (
+          <div key={star} className="flex items-center gap-2">
+            <div className="w-12 sm:w-16 text-xs sm:text-sm text-gray-600">{star} étoiles</div>
+            <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-yellow-500 rounded-full"
+                style={{ 
+                  width: `${(gradeCount[star as keyof typeof gradeCount] / totalReviews) * 100}%` 
+                }}
+              />
+            </div>
+            <div className="w-8 sm:w-12 text-xs sm:text-sm text-gray-600 text-right">
+              {gradeCount[star as keyof typeof gradeCount]}
+            </div>
           </div>
         ))}
       </div>
 
+      {/* Review Form */}
       {token ? (
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 mb-8"
-          encType="multipart/form-data"
-        >
-          <div className="flex items-center gap-2">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => handleRatingClick(star)}
-                onMouseEnter={() => setHoverRating(star)}
-                onMouseLeave={() => setHoverRating(0)}
-                className="text-2xl focus:outline-none"
-              >
-                <span className={star <= (hoverRating || rating) ? "text-yellow-500" : "text-gray-300"}>
-                  ★
-                </span>
-              </button>
-            ))}
-          </div>
-          <textarea
-            id="review"
-            {...register("review", { required: true })}
-            placeholder="Votre avis..."
-            className="bg-gray-100 p-4 rounded-md focus:outline-none"
-            rows={4}
-          />
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            className="bg-gray-100 p-2 rounded-md"
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white p-4 rounded-md hover:bg-blue-700 transition"
+        <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg">
+          <h3 className="text-base sm:text-lg font-semibold mb-4">Ajouter un avis</h3>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+            encType="multipart/form-data"
           >
-            Envoyer
-          </button>
-        </form>
-      ) : (
-        <div className="flex flex-col gap-4 mb-8">
-          <p className="text-gray-500">Veuillez vous connecter pour laisser un avis</p>
-          <button className="bg-blue-600 text-white p-4 rounded-md hover:bg-blue-700 transition">
-            Se connecter
-          </button>
-        </div>
-      )}
-
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold">Liste des avis</h3>
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-          className="bg-white border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
-        >
-          <option value="desc">Note décroissante</option>
-          <option value="asc">Note croissante</option>
-        </select>
-      </div>
-
-      {reviews.length > 0 && (
-        <div className="flex flex-col gap-4 mb-8">
-          {reviews.map((review) => (
-            <div
-              key={review.id}
-              className="bg-gray-100 p-4 rounded-lg shadow-sm"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {review.user && review.user.username ? review.user.username[0].toUpperCase() : 'A'}
-                </div>
-                <span className="font-semibold">{review.user && review.user.username || 'Anonyme'}</span>
-              </div>
-              <p className="mb-2">
-                {Array.from({ length: review.grade }, (_, i) => (
-                  <span key={i} className="text-yellow-500">
+            <div className="flex items-center gap-1 sm:gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => handleRatingClick(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  className="text-xl sm:text-2xl focus:outline-none"
+                >
+                  <span className={star <= (hoverRating || rating) ? "text-yellow-500" : "text-gray-300"}>
                     ★
                   </span>
-                ))}
-                {Array.from(
-                  { length: 5 - review.grade },
-                  (_, i) => (
-                    <span key={i} className="text-gray-300">
-                      ★
-                    </span>
-                  )
-                )}
-              </p>
-              <p className="mb-2">{review.comment}</p>
-              {review.img && (
-                <Image
-                  src={`http://localhost:1337${review.img.url}`}
-                  alt="Illustration de l'avis"
-                  width={200}
-                  height={200}
-                  objectFit="cover"
-                />
-              )}
+                </button>
+              ))}
             </div>
-          ))}
+            <textarea
+              id="review"
+              {...register("review", { required: true })}
+              placeholder="Partagez votre expérience avec ce produit..."
+              className="bg-white p-3 sm:p-4 rounded-md focus:outline-none border border-gray-300 focus:border-pink-500 text-sm sm:text-base"
+              rows={4}
+            />
+            <div className="flex flex-col gap-2">
+              <label className="text-xs sm:text-sm text-gray-600">Ajouter une photo (optionnel)</label>
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                className="bg-white p-2 rounded-md border border-gray-300 text-xs sm:text-sm"
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-orange text-white p-3 sm:p-4 rounded-md hover:bg-orange transition text-sm sm:text-base cursor-pointer"
+            >
+              Publier mon avis
+            </button>
+          </form>
+        </div>
+      ) : (
+        <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg">
+          <p className="text-sm sm:text-base text-gray-600 mb-4">Veuillez vous connecter pour laisser un avis</p>
+          <Link href="/sign-in" className="bg-orange text-white p-3 sm:p-4 rounded-md hover:bg-orange transition text-sm sm:text-base">
+            Se connecter
+          </Link>
         </div>
       )}
+
+      {/* Reviews List */}
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-4">
+          <h3 className="text-lg sm:text-xl font-semibold">Tous les avis</h3>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+            className="bg-white border border-gray-300 rounded-md px-3 sm:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange text-sm sm:text-base w-full sm:w-auto"
+          >
+            <option value="desc">Plus récents</option>
+            <option value="asc">Plus anciens</option>
+          </select>
+        </div>
+
+        {reviews.length > 0 ? (
+          <div className="space-y-4 sm:space-y-6">
+            {reviews.map((review) => (
+              <div
+                key={review.id}
+                className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-100"
+              >
+                <div className="flex items-start sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange rounded-full flex items-center justify-center text-black font-bold text-sm sm:text-base flex-shrink-0">
+                    {review.user && review.user.username ? review.user.username[0].toUpperCase() : 'A'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-sm sm:text-base truncate">
+                      {review.user && review.user.username || 'Anonyme'}
+                      {review.user && review.user.isVerified && (
+                        <span className="ml-2 text-xs sm:text-sm text-green-500">Avis vérifié</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: review.grade }, (_, i) => (
+                        <span key={i} className="text-yellow-500 text-sm sm:text-base">★</span>
+                      ))}
+                      {Array.from({ length: 5 - review.grade }, (_, i) => (
+                        <span key={i} className="text-gray-300 text-sm sm:text-base">★</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-gray-700 mb-3 sm:mb-4 text-sm sm:text-base leading-relaxed">{review.comment}</p>
+                {review.img && (
+                  <div className="mt-3 sm:mt-4">
+                    <Image
+                      src={`http://localhost:1337${review.img.url}`}
+                      alt="Illustration de l'avis"
+                      width={200}
+                      height={200}
+                      className="rounded-lg object-cover w-full max-w-xs sm:max-w-sm"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center py-6 sm:py-8 text-sm sm:text-base">Aucun avis pour le moment</p>
+        )}
+      </div>
 
       {/* Pagination */}
       {pageCount > 1 && (
-        <div className="mt-8 flex justify-center items-center gap-4">
+        <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4">
           <button
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className={`px-4 py-2 rounded-md ${
+            className={`px-3 sm:px-4 py-2 rounded-md text-sm sm:text-base ${
               currentPage === 1
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
+                : 'bg-orange text-white hover:bg-orange'
             }`}
           >
             Précédent
           </button>
           
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2 flex-wrap justify-center">
             {[...Array(pageCount)].map((_, index) => (
               <button
                 key={index + 1}
                 onClick={() => setCurrentPage(index + 1)}
-                className={`px-4 py-2 rounded-md ${
+                className={`px-3 sm:px-4 py-2 rounded-md text-sm sm:text-base ${
                   currentPage === index + 1
-                    ? 'bg-pink-600 text-white'
-                    : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
+                    ? 'bg-orange text-white'
+                    : 'bg-orange text-white hover:bg-orange'
                 }`}
               >
                 {index + 1}
@@ -308,10 +345,10 @@ export default function Reviews({ productId, productSlug }: ReviewsProps) {
           <button
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, pageCount))}
             disabled={currentPage === pageCount}
-            className={`px-4 py-2 rounded-md ${
+            className={`px-3 sm:px-4 py-2 rounded-md text-sm sm:text-base ${
               currentPage === pageCount
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-pink-100 text-pink-700 hover:bg-pink-200'
+                : 'bg-orange text-white hover:bg-orange'
             }`}
           >
             Suivant

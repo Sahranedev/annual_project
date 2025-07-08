@@ -52,7 +52,6 @@ export default async function Page() {
     const articles = response.data;
     const pageContent = await fetch("http://127.0.0.1:1337/api/article-title"); // Remplace avec ton endpoint Strapi réel
     const articleTitle = await pageContent.json();
-    console.log(articleTitle);
 
     return (
         <main className="max-w-[85vw] mx-auto px-6 py-16 bg-white p-20">

@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const res = await fetch(`${strapiUrl}/api/auth/forgot-password`, {
+  const res = await fetch(`${strapiUrl}api/auth/forgot-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),

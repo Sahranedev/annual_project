@@ -10,12 +10,13 @@ export default function SignOutPage() {
 
   useEffect(() => {
     logout();
-    router.push("/(auth)/sign-up");
+    router.push("/");
   }, [logout, router]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <p>Déconnexion en cours...</p>
+    <div className="container mx-auto px-4 py-16 flex flex-col items-center">
+      <h1 className="text-2xl font-semibold mb-4">Déconnexion en cours...</h1>
+      <p>Vous allez être redirigé vers la page d&apos;accueil.</p>
     </div>
   );
 }

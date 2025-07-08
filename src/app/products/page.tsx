@@ -1,82 +1,269 @@
-import Filters from '@/components/products/Filters'
-import Image from 'next/image'
-import Link from 'next/link'
+'use client'
 
-interface PageProps {
-  searchParams?: {
-    category?: string
-    search?: string,
-    minPrice?: string
-    maxPrice?: string
-  }
+import Filters from "@/components/products/Filters";
+import Image from "next/image";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { motion } from "motion/react";
+import { useSearchParams } from "next/navigation";
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  parent: {
+    slug: string;
+  };
 }
 
-export default async function Page({ searchParams }: PageProps) {
-  const { category, minPrice, maxPrice } = await Promise.resolve(searchParams ?? {})
+interface Product {
+  id: number;
+  title: string;
+  slug: string | null;
+  price: number;
+  Promotion: boolean;
+  discountPercent: number;
+  images: Array<{
+    formats: {
+      thumbnail: { url: string };
+      large: { url: string };
+    };
+  }>;
+  categories: Category[];
+}
 
-  let url = 'http://localhost:1337/api/products?populate=*'
+export default function Page() {
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const searchParams = useSearchParams()
+  const minPrice = searchParams.get('minPrice')
+  const maxPrice = searchParams.get('maxPrice')
+  const category = searchParams.getAll('category')
 
-  if (category) {
-    const categoryArray = category.split(',').map((id) => `filters[categories][id][$in]=${id}`)
-    url += `&${categoryArray.join('&')}`
+  let url = "http://localhost:1337/api/products?populate=*&populate=categories&populate=categories.parent&populate=images";
+
+  // Récupérer toutes les catégories depuis les paramètres de recherche
+  const categoryParams: string[] = [];
+  if (category && category.length > 0) {
+    console.log(category);
+    categoryParams.push(...category);
+  }
+
+  if (categoryParams.length > 0) {
+    const categoryFilters = categoryParams.map((slug) => `filters[categories][slug][$in]=${slug}`);
+    url += `&${categoryFilters.join("&")}`;
   }
 
   if (minPrice) {
-    url += `&filters[price][$gte]=${minPrice}`
+    url += `&filters[price][$gte]=${minPrice}`;
   }
   if (maxPrice) {
-    url += `&filters[price][$lte]=${maxPrice}`
+    url += `&filters[price][$lte]=${maxPrice}`;
   }
 
-  const res = await fetch(url, { method: 'GET', cache: 'no-store' })
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (!res.ok) throw new Error('Failed to fetch data')
+  // Fetch products
+  useEffect(() => {
+    console.log(url);
+    
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch(url, { method: "GET", cache: "no-store" });
+        if (!res.ok) throw new Error("Failed to fetch data");
+        const data = await res.json();
+        setProducts(data.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [url]);
 
-  const data = await res.json()
-  const products = data.data
-  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange mx-auto mb-4"></div>
+          <p className="text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <div className='w-full h-80 bg-gray-300 mb-10'></div>
-      <div className='flex gap-10 mx-40'>
-        <Filters categoryParam={category} />
-        <main className='flex-1'>
-          <ul className='grid grid-cols-3 gap-10'>
-            {products.map((product: any) => (
-              <Link key={product.id} href={`/products/${product.slug}`}>
-                <li className='flex flex-col items-center gap-2 aspect-square'>
-                  <div className='relative flex flex-col items-center justify-end w-full aspect-square'>
-                    {product.images?.[0]?.formats?.thumbnail?.url && (
-                      <Image
-                        src={`http://localhost:1337${product.images[0].formats.large.url}`}
-                        alt={product.title}
-                        fill
-                        className='absolute top-0 left-0 object-cover w-full h-full -z-10'
-                      />
-                    )}
-                    <button className='p-2 m-4 bg-white border border-black rounded-lg'>Ajouter au panier</button>
-                    {product.Promotion && (
-                      <p className='absolute left-2 top-2 bg-pink-300 px-4 py-2'>En promo</p>
-                    )}
-                  </div>
-                  <p>
-                    {product.categories?.map((category: any, index: number) => (
-                      <span key={category.id} className='text-sm text-gray-500'>
-                        {category.name}
-                        {index !== product.categories.length - 1 &&
-                          product.categories.length > 1 &&
-                          ' / '}
-                      </span>
-                    ))}
-                  </p>
-                  <h2 className='text-lg font-bold'>{product.title}</h2>
-                  <p className='text-lg'>À partir de <span className={`${product.Promotion ?'line-through' : ''}`}>{product.price}€</span>{product.Promotion && <span className='text-bold text-pink-400'> {(product.price - product.price * (product.discountPercent / 100)).toFixed(2)}€</span>}</p>
-                </li>
-              </Link>
-            ))}
-          </ul>
-        </main>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        {/* Mobile filters toggle */}
+        <div className="mb-6 lg:hidden block">
+          <button 
+            onClick={() => setIsFiltersOpen(true)}
+            className="w-full px-4 py-3 bg-orange text-white rounded-lg font-medium flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            Filtres et recherche
+          </button>
+        </div>
+        
+        {/* Mobile Filters Modal */}
+        {isFiltersOpen && (
+          <div className="fixed z-50">
+            <div className="fixed inset-y-0 left-0 w-full max-w-sm bg-white shadow-xl overflow-y-auto transform transition-transform duration-300 ease-out">
+              <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                <h2 className="text-lg font-medium">Filtres</h2>
+                <button 
+                  onClick={() => setIsFiltersOpen(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-4">
+                <Filters />
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
+          {/* Desktop Filters */}
+          <div className="hidden lg:block">
+            <Filters />
+          </div>
+          
+          <main className="flex-1">
+            <div className="mb-4 sm:mb-6 lg:mb-8 flex justify-between items-center">
+              <p className="text-sm sm:text-base text-gray-600">{products.length} produits</p>
+            </div>
+            
+            {products.length === 0 && (
+              <p className="text-gray-600 text-center py-8">Aucun produit trouvé</p>
+            )}
+            
+            {/* Responsive grid */}
+            <motion.ul 
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1,
+                    delayChildren: 0.2
+                  }
+                }
+              }}
+            >
+              {products.map((product, index) => (
+                <motion.li
+                  key={product.id}
+                  variants={{
+                    hidden: { 
+                      opacity: 0, 
+                      y: 20,
+                      scale: 0.95
+                    },
+                    visible: { 
+                      opacity: 1, 
+                      y: 0,
+                      scale: 1,
+                      transition: {
+                        duration: 0.5,
+                        ease: "easeOut"
+                      }
+                    }
+                  }}
+                >
+                  <Link
+                    href={`/products/${product.categories[0].parent ? product.categories[0].parent.slug + '/' : ''}${product.categories[0].slug}/${product.slug || product.id}`}
+                    className="cursor-pointer block"
+                  >
+                    <div className="group">
+                      <motion.div 
+                        className="relative aspect-square mb-3 sm:mb-4 overflow-hidden rounded-lg"
+                        whileHover={{ 
+                          scale: 1.02,
+                          transition: { duration: 0.2 }
+                        }}
+                      >
+                        {product.images?.[0]?.formats?.thumbnail?.url && (
+                          <Image
+                            src={`http://localhost:1337${product.images[0].formats.large.url}`}
+                            alt={product.title}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                        )}
+                        {product.Promotion && (
+                          <motion.span 
+                            className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-pink-500 text-white px-2 sm:px-3 py-1 text-xs sm:text-sm"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.3 + index * 0.1, type: "spring", stiffness: 200 }}
+                          >
+                            En promo !
+                          </motion.span>
+                        )}
+                        <motion.button 
+                          className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 bg-orange text-white py-2 px-3 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center cursor-pointer text-sm sm:text-base"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Ajouter au panier
+                        </motion.button>
+                      </motion.div>
+                      <motion.div 
+                        className="text-center px-2"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 + index * 0.1, duration: 0.3 }}
+                      >
+                        <p className="text-xs sm:text-sm text-gray-500 mb-1">
+                          {product.categories?.map((category, index) => (
+                            <span key={category.id}>
+                              {category.name}
+                              {index !== product.categories.length - 1 && " / "}
+                            </span>
+                          ))}
+                        </p>
+                        <h2 className="text-sm sm:text-base lg:text-lg font-medium mb-1 sm:mb-2 line-clamp-2">
+                          {product.title}
+                        </h2>
+                        <p className="text-sm sm:text-base lg:text-lg">
+                          {product.Promotion ? (
+                            <>
+                              <span className="line-through text-gray-500">
+                                {product.price}€
+                              </span>
+                              <span className="ml-2 text-pink-500 font-medium">
+                                {(
+                                  product.price -
+                                  product.price * (product.discountPercent / 100)
+                                ).toFixed(2)}
+                                €
+                              </span>
+                            </>
+                          ) : (
+                            <span>{product.price}€</span>
+                          )}
+                        </p>
+                      </motion.div>
+                    </div>
+                  </Link>
+                </motion.li>
+              ))}
+            </motion.ul>
+          </main>
+        </div>
       </div>
     </div>
-  )
+  );
 }
