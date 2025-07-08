@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useCartStore } from "@/app/store/cartStore";
 import { formatPrice } from "@/app/utils";
+import { FaRegTrashAlt } from "react-icons/fa";
 
 type CartItemProps = {
   id: number;
@@ -33,7 +34,7 @@ export default function CartItem({
     <tr className="border-b">
       <td className="py-4">
         <div className="flex items-center">
-          <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border">
+          <div className="h-20 w-20 ml-4 flex-shrink-0 overflow-hidden rounded-md border">
             <Image
               src={thumbnail}
               alt={title}
@@ -78,7 +79,7 @@ export default function CartItem({
           onClick={() => remove(id)}
           className="text-red-500 hover:text-red-700 cursor-pointer"
         >
-          Supprimer
+          <FaRegTrashAlt color="red" size={20} />
         </button>
       </td>
     </tr>

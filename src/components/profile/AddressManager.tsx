@@ -35,7 +35,7 @@ export default function AddressManager({ type }: AddressManagerProps) {
 
     try {
       const response = await ApiHelper(
-        "user-addresses",
+        "user-addresse",
         "POST",
         {
           ...data,
@@ -70,7 +70,7 @@ export default function AddressManager({ type }: AddressManagerProps) {
 
     try {
       const response = await ApiHelper(
-        `user-addresses/${editingAddress.id}`,
+        `user-addresse/${editingAddress.id}`,
         "PUT",
         {
           ...data,
@@ -100,7 +100,7 @@ export default function AddressManager({ type }: AddressManagerProps) {
 
     try {
       const response = await ApiHelper(
-        `user-addresses/${id}`,
+        `user-addresse/${id}`,
         "DELETE",
         null,
         token
