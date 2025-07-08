@@ -38,7 +38,7 @@ function formatDate(dateString: string) {
 }
 
 export default async function Page() {
-    const res = await fetch("http://127.0.0.1:1337/api/articles?populate=image", {
+    const res = await fetch("http://localhost:1337/api/articles?populate=image", {
         method: "GET",
         cache: "no-store",
     });
@@ -50,7 +50,7 @@ export default async function Page() {
 
     const response: StrapiResponse = await res.json();
     const articles = response.data;
-    const pageContent = await fetch("http://127.0.0.1:1337/api/article-title"); // Remplace avec ton endpoint Strapi réel
+    const pageContent = await fetch("http://localhost:1337/api/article-title"); // Remplace avec ton endpoint Strapi réel
     const articleTitle = await pageContent.json();
 
     return (

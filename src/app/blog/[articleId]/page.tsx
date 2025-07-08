@@ -32,7 +32,7 @@ interface ArticleResponse {
 
 
 export default async function ArticlePage({ params }: { params: { articleId: string } }) {
-    const res = await fetch(`http://127.0.0.1:1337/api/articles/${params.articleId}?populate=image`, {
+    const res = await fetch(`http://localhost:1337/api/articles/${params.articleId}?populate=image`, {
         method: "GET",
         cache: "no-store",
     });

@@ -12,12 +12,13 @@ export default function Page() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const catRes = await fetch("http://127.0.0.1:1337/api/creation-categories");
+      const catRes = await fetch("http://localhost:1337/api/creation-categories");
       const catData = await catRes.json();
       setCategories(catData.data);
 
-      const creationsRes = await fetch("http://127.0.0.1:1337/api/creations?populate=*");
+      const creationsRes = await fetch("http://localhost:1337/api/creations?populate=*");
       const creationsData = await creationsRes.json();
+      console.log(creationsData.data);
       setCreations(creationsData.data);
       setFilteredCreations(creationsData.data);
     };

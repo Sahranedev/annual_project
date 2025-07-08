@@ -35,7 +35,7 @@ interface CreationResponse {
 }
 
 export default async function CreationPage({ params }: { params: { creationId: string } }) {
-    const res = await fetch(`http://127.0.0.1:1337/api/creations/${params.creationId}?populate=images`, {
+    const res = await fetch(`http://localhost:1337/api/creations/${params.creationId}?populate=*`, {
         method: "GET",
         cache: "no-store",
     });
@@ -105,25 +105,26 @@ export default async function CreationPage({ params }: { params: { creationId: s
 
                 <div className="md:w-1/2">
                     <h1 className="text-[60px] font-bold text-gray-800 mb-8">{creation.name}</h1>
-
-                    {/* Catégories */}
-                    {creation.creation_categories?.data?.length > 0 && (
-                        <div className="mb-6 space-y-2">
-                            <span className="text-black text-sm">Catégorie(s) :</span>
-                            <div className="flex flex-wrap gap-2">
-                                {creation.creation_categories.data.map((cat) => (
-                                    <span key={cat.id} className="text-pink-500 text-sm bg-pink-50 px-2 py-1 rounded">
-                                        {cat.name}
-                                    </span>
-                                ))}
-                            </div>
+                    {/* Catégories (en ligne, séparées par des virgules) */}
+                    {creation.creation_categories?.length > 0 && (
+                        <div className="mb-6">
+                            <span className="text-black text-sm font-semibold">Catégories : </span>
+                            <span className="text-pink-500 text-sm">
+                                {creation.creation_categories.map((cat) => cat.name).join(", ")}
+                            </span>
                         </div>
                     )}
 
+
                     {/* Short description */}
-                    <p className="text-lg text-gray-600 leading-relaxed mb-12">
+                    <p className="text-lg text-gray-600 leading-relaxed mb-6">
                         {creation.shortDescription}
                     </p>
+                    <p className="bg-red-100 text-red-500 px-4 py-2 rounded-md mb-6">
+                        <span className="text-black">Durée de réalisation : </span>
+                        <span className="text-gray-700">{creation.realisationDuration} h</span>
+                    </p>
+
                 </div>
             </article>
 
@@ -168,10 +169,10 @@ export default async function CreationPage({ params }: { params: { creationId: s
                         ),
                         img: ({ node, ...props }) => (
                             <img
-                              {...props}
-                              className="w-full  mx-auto my-6  shadow-md"
+                                {...props}
+                                className="w-full  mx-auto my-6  shadow-md"
                             />
-                          ),
+                        ),
                     }}
                 >
                     {creation.longDescription}
