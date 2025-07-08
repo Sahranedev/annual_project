@@ -2,12 +2,15 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../hooks/useAuth";
+import { useAuthStore } from "../../store/authStore";
 import ProfileTabs from "@/components/profile/ProfileTabs";
 import ProfileInfo from "@/components/profile/ProfileInfo";
 import AddressManager from "@/components/profile/AddressManager";
+import { FiLogOut } from "react-icons/fi";
 
 export default function ProfilePage() {
   const { user, isAuthenticated, loading } = useAuth();
+  const { logout } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeTabParam = searchParams.get("tab");
@@ -27,6 +30,11 @@ export default function ProfilePage() {
       router.replace("/sign-in");
     }
   }, [loading, isAuthenticated, router]);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   if (loading) {
     return (
@@ -63,7 +71,16 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-8">Mon compte</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold">Mon compte</h1>
+        <button
+          onClick={handleLogout}
+          className="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+        >
+          <FiLogOut className="mr-2" />
+          Déconnexion
+        </button>
+      </div>
 
       <div className="bg-white rounded-lg shadow-sm">
         <ProfileTabs tabs={tabs} activeTab={activeTab} />

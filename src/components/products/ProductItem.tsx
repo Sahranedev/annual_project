@@ -1,10 +1,11 @@
-'use client'
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { toast } from "react-toastify";
 import { useCartStore } from "@/app/store/cartStore";
+import WishlistButton from "@/components/ui/WishlistButton";
 
 interface Category {
   id: number;
@@ -49,8 +50,7 @@ export default function ProductItem({ product, index }: ProductItemProps) {
       title: product.title,
       price: product.price,
       documentId: product.documentId,
-      thumbnail:
-        `http://localhost:1337${product.images?.[0]?.formats?.thumbnail?.url}`,
+      thumbnail: `http://localhost:1337${product.images?.[0]?.formats?.thumbnail?.url}`,
       quantity: 1,
     };
 
@@ -63,33 +63,33 @@ export default function ProductItem({ product, index }: ProductItemProps) {
     <motion.li
       key={product.id}
       variants={{
-        hidden: { 
-          opacity: 0, 
+        hidden: {
+          opacity: 0,
           y: 20,
-          scale: 0.95
+          scale: 0.95,
         },
-        visible: { 
-          opacity: 1, 
+        visible: {
+          opacity: 1,
           y: 0,
           scale: 1,
           transition: {
             duration: 0.5,
-            ease: "easeOut"
-          }
-        }
+            ease: "easeOut",
+          },
+        },
       }}
       className="list-none"
     >
       <Link
-        href={`/products/${product.categories[0].parent ? product.categories[0].parent.slug + '/' : ''}${product.categories[0].slug}/${product.slug || product.id}`}
+        href={`/products/${product.categories[0].parent ? product.categories[0].parent.slug + "/" : ""}${product.categories[0].slug}/${product.slug || product.id}`}
         className="cursor-pointer block"
       >
         <div className="group">
-          <motion.div 
+          <motion.div
             className="relative aspect-square mb-3 sm:mb-4 overflow-hidden rounded-lg"
-            whileHover={{ 
+            whileHover={{
               scale: 1.02,
-              transition: { duration: 0.2 }
+              transition: { duration: 0.2 },
             }}
           >
             {product.images?.[0]?.formats?.thumbnail?.url && (
@@ -101,16 +101,24 @@ export default function ProductItem({ product, index }: ProductItemProps) {
               />
             )}
             {product.Promotion && (
-              <motion.span 
+              <motion.span
                 className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-pink-500 text-white px-2 sm:px-3 py-1 text-xs sm:text-sm"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 0.3 + index * 0.1, type: "spring", stiffness: 200 }}
+                transition={{
+                  delay: 0.3 + index * 0.1,
+                  type: "spring",
+                  stiffness: 200,
+                }}
               >
                 En promo !
               </motion.span>
             )}
-            <motion.button 
+            <WishlistButton
+              product={product}
+              className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10 bg-white bg-opacity-70 p-1 rounded-full"
+            />
+            <motion.button
               className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 bg-orange text-white py-2 px-3 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center cursor-pointer text-sm sm:text-base"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -119,7 +127,7 @@ export default function ProductItem({ product, index }: ProductItemProps) {
               Ajouter au panier
             </motion.button>
           </motion.div>
-          <motion.div 
+          <motion.div
             className="text-center px-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -159,4 +167,4 @@ export default function ProductItem({ product, index }: ProductItemProps) {
       </Link>
     </motion.li>
   );
-} 
+}

@@ -43,7 +43,6 @@ export default async function ArticlePage({ params }: { params: { articleId: str
 
     const response: ArticleResponse = await res.json();
     const article = response.data;
-    console.log(article);
     const styledHtml = parse(article.longDescription, {
         replace: (domNode) => {
             if (domNode instanceof Element) {

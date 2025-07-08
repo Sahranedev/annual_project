@@ -12,15 +12,12 @@ import CartItem from "@/components/cart/CartItem";
 export default function CartPage() {
   const {
     items,
-    remove,
-    updateQuantity,
+
     subtotal,
     total,
     shippingCost,
     promoCode,
   } = useCartStore();
-
-  console.log(items);
 
   const discountAmount = promoCode
     ? (subtotal() * promoCode.discount) / 100

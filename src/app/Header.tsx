@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FiMenu,
   FiX,
@@ -8,21 +8,30 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiUser,
+  FiHeart,
+  FiLogOut,
+  FiSettings,
 } from "react-icons/fi";
 import ApiHelper from "./ApiHelper";
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "./store/cartStore";
+import { useAuthStore } from "./store/authStore";
 import { HeaderDataProps } from "@/types/header";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [headerData, setHeaderData] = useState<HeaderDataProps>({});
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Ajout du panier
   const { items } = useCartStore();
+  const { isAuthenticated, logout } = useAuthStore();
+  const router = useRouter();
+
   const cartItemsCount = mounted
     ? items.reduce((sum, item) => sum + item.quantity, 0)
     : 0;
@@ -37,13 +46,28 @@ export default function Header() {
         const route =
           "header?populate[0]=logo&populate[1]=links&populate[2]=links.sublinks&populate[3]=links.sublinks.img";
         const { data } = await ApiHelper(route, "GET");
-        console.log(data);
         setHeaderData(data || {});
       } catch (error) {
         console.log(error);
       }
     };
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const toggleMenu = () => {
@@ -59,6 +83,13 @@ export default function Header() {
     if (isMenuOpen) {
       setIsMenuOpen(false);
     }
+    setShowProfileMenu(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setShowProfileMenu(false);
+    router.push("/");
   };
 
   return (
@@ -121,14 +152,18 @@ export default function Header() {
                                 }}
                               >
                                 {sublink.img && (
-                                  <div className="flex-shrink-0">
+                                  <div className="relative flex-shrink-0 aspect-square w-[200px] h-[200px]">
                                     <Image
-                                      src={"http://localhost:1337" + sublink.img.url}
-                                      alt={sublink.img.alternativeText || "Image"}
-                                      width={200}
-                                      height={200}
+                                      src={
+                                        "http://localhost:1337" +
+                                        sublink.img.url
+                                      }
+                                      alt={
+                                        sublink.img.alternativeText || "Image"
+                                      }
+                                      fill
                                       objectFit="cover"
-                                      className="rounded-md"
+                                      className="rounded-md size-full"
                                     />
                                   </div>
                                 )}
@@ -153,6 +188,15 @@ export default function Header() {
           {/* Boutons de droite (toujours visibles) */}
           <div className="flex items-center space-x-4">
             <Link
+              href="/wishlist"
+              className="relative text-gray-700 hover:text-gray-900"
+              onClick={handleLinkClick}
+              title="Liste de souhaits"
+            >
+              <FiHeart className="h-6 w-6" />
+            </Link>
+
+            <Link
               href="/cart"
               className="relative text-gray-700 hover:text-gray-900"
               onClick={handleLinkClick}
@@ -165,13 +209,56 @@ export default function Header() {
               )}
             </Link>
 
-            <Link
-              href="/profile"
-              className="text-gray-700 hover:text-gray-900"
-              onClick={handleLinkClick}
-            >
-              <FiUser className="h-6 w-6" />
-            </Link>
+            <div className="relative" ref={profileMenuRef}>
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="text-gray-700 hover:text-gray-900 flex items-center"
+                aria-expanded={showProfileMenu}
+                aria-haspopup="true"
+              >
+                <FiUser className="h-6 w-6" />
+                {isAuthenticated && <FiChevronDown className="ml-1 h-4 w-4" />}
+              </button>
+
+              {showProfileMenu && isAuthenticated && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                  <Link
+                    href="/profile"
+                    className=" px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                    onClick={handleLinkClick}
+                  >
+                    <FiSettings className="mr-2" />
+                    Mon profil
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className=" w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                  >
+                    <FiLogOut className="mr-2" />
+                    Déconnexion
+                  </button>
+                </div>
+              )}
+
+              {showProfileMenu && !isAuthenticated && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                  <Link
+                    href="/sign-in"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={handleLinkClick}
+                  >
+                    Connexion
+                  </Link>
+                  <Link
+                    href="/sign-up"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={handleLinkClick}
+                  >
+                    Inscription
+                  </Link>
+                </div>
+              )}
+            </div>
 
             {/* Bouton menu burger (mobile uniquement) */}
             <div className="md:hidden">
@@ -241,6 +328,45 @@ export default function Header() {
                     )}
                 </div>
               ))}
+
+            {isAuthenticated && (
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <Link
+                  href="/profile"
+                  className="flex items-center text-gray-900 hover:text-gray-700 px-3 py-2 text-base font-medium"
+                  onClick={handleLinkClick}
+                >
+                  <FiSettings className="mr-2" />
+                  Mon profil
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center text-gray-900 hover:text-gray-700 px-3 py-2 text-base font-medium w-full"
+                >
+                  <FiLogOut className="mr-2" />
+                  Déconnexion
+                </button>
+              </div>
+            )}
+
+            {!isAuthenticated && (
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <Link
+                  href="/sign-in"
+                  className="text-gray-900 hover:text-gray-700 px-3 py-2 text-base font-medium block"
+                  onClick={handleLinkClick}
+                >
+                  Connexion
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="text-gray-900 hover:text-gray-700 px-3 py-2 text-base font-medium block"
+                  onClick={handleLinkClick}
+                >
+                  Inscription
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}

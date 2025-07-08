@@ -20,6 +20,10 @@ export interface UserProfile {
   lastName?: string;
   displayName?: string;
   addresses: UserAddress[];
+  wishlists?: {
+    id: number;
+    articles: number[];
+  }[];
 }
 
 export interface AddressFormData {

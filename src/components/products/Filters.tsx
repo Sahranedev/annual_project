@@ -72,7 +72,6 @@ export default function Filters() {
         })
         const data = await res.json()
         setCategories(data.data)
-        console.log(data.data);
         
       } catch (err) {
         console.error('Error fetching categories', err)
@@ -98,7 +97,6 @@ export default function Filters() {
 
 
   const handleChangeCategories = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target)
     const slug = e.target.name
     const updated = e.target.checked
       ? [...selectedCategories, slug]
