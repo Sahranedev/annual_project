@@ -240,45 +240,41 @@ export default function ProductPage({
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
-            {product?.images?.[0]?.formats?.thumbnail?.url && (
+          <div className="relative rounded-lg overflow-hidden bg-gray-100 max-w-[50vw] aspect-[4/3]">
+            {product?.images?.[0]?.formats?.large?.url && (
               <Image
                 src={imgSelected || ""}
                 alt={product.title}
                 fill
-                className="object-cover"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-contain"
               />
             )}
           </div>
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
             {product?.images.length > 1 &&
-              product?.images
-                ?.slice(0, 5)
-                .map((image: ProductImage, index: number) => (
-                  <motion.button
-                    key={image.id}
-                    className={`relative aspect-square rounded-lg overflow-hidden ${imgSelected === `http://localhost:1337${image.formats.thumbnail.url}` ? "ring-2 ring-pink-400" : ""}`}
-                    onClick={() =>
-                      setImgSelected(
-                        `http://localhost:1337${image.formats.thumbnail.url}`
-                      )
-                    }
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Image
-                      src={`http://localhost:1337${image.formats.thumbnail.url}`}
-                      alt={product.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 25vw, (max-width: 1024px) 10vw, 8vw"
-                    />
-                  </motion.button>
-                ))}
+              product?.images?.slice(0, 5).map((image: ProductImage, index: number) => (
+                <motion.button
+                  key={image.id}
+                  className={`relative aspect-square rounded-lg overflow-hidden ${imgSelected === `http://localhost:1337${image.formats.thumbnail.url}` ? "ring-2 ring-pink-400" : ""}`}
+                  onClick={() =>
+                    setImgSelected(
+                      `http://localhost:1337${image.formats.thumbnail.url}`
+                    )
+                  }
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Image
+                    src={`http://localhost:1337${image.formats.medium.url}`}
+                    alt={product.title}
+                    fill
+                    className="object-cover"
+                  />
+                </motion.button>
+              ))}
           </div>
         </motion.div>
 

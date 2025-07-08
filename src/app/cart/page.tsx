@@ -20,8 +20,6 @@ export default function CartPage() {
     promoCode,
   } = useCartStore();
 
-  console.log(items);
-
   const handleQuantityChange = (id: number, newQuantity: number) => {
     if (newQuantity < 1) return;
     updateQuantity(id, newQuantity);

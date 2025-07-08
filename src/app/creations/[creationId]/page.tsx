@@ -40,12 +40,8 @@ export default async function CreationPage({ params }: { params: { creationId: s
         cache: "no-store",
     });
 
-    console.log(res);
-
     const response: CreationResponse = await res.json();
-    console.log(response);
     const creation = response.data;
-    console.log(creation);
 
 
     const imageUrl = creation.images?.[0]?.formats?.small?.url;

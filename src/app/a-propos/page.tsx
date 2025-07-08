@@ -6,7 +6,6 @@ import AboutLastSection from '@/components/About/AboutLastSection';
 export default async function AboutPage() {
   const response = await fetch(`http://localhost:1337/api/about?populate=firstSection&populate=firstSection.images&populate=arguments&populate=arguments.Arguments&populate=lastSection&populate=lastSection.images`);
   const data = await response.json();
-  console.log(data);
   
   const aboutData = data.data;
 

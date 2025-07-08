@@ -37,7 +37,6 @@ export default function Header() {
         const route =
           "header?populate[0]=logo&populate[1]=links&populate[2]=links.sublinks&populate[3]=links.sublinks.img";
         const { data } = await ApiHelper(route, "GET");
-        console.log(data);
         setHeaderData(data || {});
       } catch (error) {
         console.log(error);
@@ -121,14 +120,13 @@ export default function Header() {
                                 }}
                               >
                                 {sublink.img && (
-                                  <div className="flex-shrink-0">
+                                  <div className="relative flex-shrink-0 aspect-square w-[200px] h-[200px]">
                                     <Image
                                       src={"http://localhost:1337" + sublink.img.url}
                                       alt={sublink.img.alternativeText || "Image"}
-                                      width={200}
-                                      height={200}
+                                      fill
                                       objectFit="cover"
-                                      className="rounded-md"
+                                      className="rounded-md size-full"
                                     />
                                   </div>
                                 )}

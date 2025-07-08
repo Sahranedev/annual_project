@@ -9,9 +9,9 @@ interface Category {
   name: string
 }
 
-interface Product {
+interface Creation {
   id: number
-  title: string
+  name: string
   slug: string
   price: number
   Promotion: boolean
@@ -22,10 +22,10 @@ interface Product {
       large: { url: string }
     }
   }>
-  categories: Category[]
+  creation_categories: Category[]
 }
 
-export default function CreationItem({ product }: { product: Product }) {
+export default function CreationItem({ creation }: { creation: Creation }) {
   const [isHovered, setIsHovered] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
 
@@ -39,7 +39,7 @@ export default function CreationItem({ product }: { product: Product }) {
 
   return (
     <div 
-      key={product.id} 
+      key={creation.id} 
       className="relative bg-white rounded-lg shadow-md aspect-square" 
       onMouseMove={handleMouseMove} 
       onMouseEnter={() => setIsHovered(true)}
@@ -47,8 +47,8 @@ export default function CreationItem({ product }: { product: Product }) {
     >
       <div className="relative size-full overflow-hidden">
         <Image
-          src={`http://localhost:1337${product.images[0].formats.large.url}`}
-          alt={product.title}
+          src={`http://localhost:1337${creation.images[0].formats.large.url}`}
+          alt={creation.name}
           fill
           className="object-cover"
         />
@@ -70,7 +70,7 @@ export default function CreationItem({ product }: { product: Product }) {
               transition={{ duration: 0.3 }}
               className="text-white origin-top text-lg sm:text-xl md:text-2xl font-bold bg-orange px-2"
             >
-              {product.title}
+              {creation.name}
             </motion.h3>
             <motion.span 
               initial={{ scaleY: 0 }}
@@ -78,7 +78,7 @@ export default function CreationItem({ product }: { product: Product }) {
               transition={{ duration: 0.3, delay: 0.3 }}
               className='absolute origin-top bg-orange text-white text-xs sm:text-sm w-fit text-nowrap px-2'
             >
-              {product.categories.map((category) => category.name).join(', ')}
+              {creation.creation_categories.map((category) => category.name).join(', ')}
             </motion.span>
           </motion.div>
         )}
