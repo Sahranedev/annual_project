@@ -36,7 +36,7 @@ export default function SignUp() {
       if (rememberMe) {
         localStorage.setItem("remember", "true");
       }
-      router.push("/profile");
+      router.push("/");
     } catch (err: Error | unknown) {
       console.error(err);
       const errorMessage =

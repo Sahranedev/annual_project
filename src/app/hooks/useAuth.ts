@@ -15,9 +15,8 @@ export function useAuth() {
 
     const fetchUserData = async () => {
       try {
-        // Récupérer les informations de base de l'utilisateur
         const userResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337/"}api/users/me`,
+          `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/users/me`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -27,7 +26,6 @@ export function useAuth() {
 
         const userData = await userResponse.json();
 
-        // Récupérer les adresses de l'utilisateur
         const addressesResponse = await ApiHelper(
           `user-addresses?filters[user_id][$eq]=${userData.id}`,
           "GET",
@@ -35,7 +33,6 @@ export function useAuth() {
           token
         );
 
-        // Créer le profil complet
         const fullProfile: UserProfile = {
           ...userData,
           addresses: addressesResponse.data || [],

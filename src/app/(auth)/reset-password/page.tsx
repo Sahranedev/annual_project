@@ -1,5 +1,5 @@
-// src/app/(auth)/reset-password/page.tsx
-"use client"; // reste client
+"use client";
+
 import { useState, FormEvent } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
@@ -13,23 +13,34 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     if (!code) return;
 
-    const res = await fetch("/api/reset-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        code,
-        password: newPassword,
-        passwordConfirmation: newPassword,
-      }),
-    });
+    try {
+      const res = await fetch("/api/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          password: newPassword,
+          passwordConfirmation: newPassword,
+        }),
+      });
 
-    if (!res.ok) {
-      const err = await res.json();
-      return alert("Erreur : " + (err.error || res.statusText));
+      const data = await res.json();
+
+      if (!res.ok) {
+        return alert("Erreur : " + (data.error || res.statusText));
+      }
+
+      alert("Mot de passe mis à jour !");
+      router.push("/sign-in");
+    } catch (error) {
+      console.error(
+        "Erreur lors de la réinitialisation du mot de passe:",
+        error
+      );
+      alert(
+        "Une erreur est survenue lors de la réinitialisation du mot de passe."
+      );
     }
-
-    alert("Mot de passe mis à jour !");
-    router.push("/sign-up");
   }
   return (
     <div className="flex w-full h-[500px]">
