@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
   // Création de l’utilisateur
   const registerRes = await fetch(
-    `${process.env.STRAPI_URL}api/auth/local/register`,
+    `${process.env.STRAPI_URL}/api/auth/local/register`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 
   // Demande de reset‑password
   const fpRes = await fetch(
-    `${process.env.STRAPI_URL}api/auth/forgot-password`,
+    `${process.env.STRAPI_URL}/api/auth/forgot-password`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

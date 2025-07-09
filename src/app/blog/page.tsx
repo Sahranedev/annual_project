@@ -49,18 +49,9 @@ export default async function Page() {
 
     const response: StrapiResponse = await res.json();
     const articles = response.data;
-    const pageContent = await fetch("http://localhost:1337/api/article-title"); // Remplace avec ton endpoint Strapi réel
-    const articleTitle = await pageContent.json();
 
     return (
         <main className="max-w-[85vw] mx-auto px-6 py-16 bg-white p-20">
-            <header className="mb-16 text-center">
-                <h1 className="text-4xl font-bold text-gray-900 mb-6">{articleTitle.data.ArticleTitle}</h1>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                    {articleTitle.data.ArticleSubTitle}
-                </p>
-            </header>
-
             <section className="space-y-16">
                 {articles.reverse().map((article, index) => (
                     <Link
