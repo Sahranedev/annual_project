@@ -82,11 +82,49 @@ async function handleCheckoutSessionCompleted(
   );
   console.log("Devise:", session.currency);
   console.log("Statut de paiement:", session.payment_status);
+  console.log("Métadonnées:", session.metadata);
 
-  if (session.customer_email) {
+  const userId = session.metadata?.userId;
+
+  if (userId) {
+    try {
+      console.log(`Mise à jour de isVerified pour l'utilisateur ID: ${userId}`);
+
+      const BACKEND_URL =
+        process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+
+      const apiToken = process.env.NEXT_PUBLIC_STRAPI_API_TOKEN;
+
+      if (!apiToken) {
+        throw new Error("Token API Strapi non configuré");
+      }
+
+      const updateResponse = await fetch(`${BACKEND_URL}/api/users/${userId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          isVerified: true,
+        }),
+      });
+
+      if (!updateResponse.ok) {
+        const errorData = await updateResponse.json();
+        throw new Error(
+          `Erreur lors de la mise à jour de l'utilisateur: ${errorData.error?.message || "Erreur inconnue"}`
+        );
+      }
+
+      console.log(`Utilisateur ${userId} marqué comme vérifié avec succès`);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de isVerified:", error);
+    }
+  } else if (session.customer_email) {
     try {
       console.log(
-        `Mise à jour de isVerified pour l'utilisateur: ${session.customer_email}`
+        `Fallback: Mise à jour de isVerified pour l'email: ${session.customer_email}`
       );
 
       const BACKEND_URL =
@@ -152,6 +190,8 @@ async function handleCheckoutSessionCompleted(
     } catch (error) {
       console.error("Erreur lors de la mise à jour de isVerified:", error);
     }
+  } else {
+    console.log("Aucun identifiant utilisateur trouvé dans la session");
   }
 
   console.log("Traitement de la session de paiement terminé");
@@ -165,16 +205,12 @@ async function handlePaymentIntentSucceeded(
   console.log("Montant:", paymentIntent.amount / 100);
   console.log("Devise:", paymentIntent.currency);
   console.log("Méthode de paiement:", paymentIntent.payment_method_types);
-
-  // Logique supplémentaire si nécessaire
 }
 
 async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   console.log("Échec de l'intent de paiement:", paymentIntent);
   console.log("ID du paiement:", paymentIntent.id);
   console.log("Erreur:", paymentIntent.last_payment_error?.message);
-
-  // Logique pour gérer les échecs de paiement
 }
 
 // Configuration pour désactiver le parsing du corps de la requête car nous avons besoin du corps brut pour la vérification de la signature
