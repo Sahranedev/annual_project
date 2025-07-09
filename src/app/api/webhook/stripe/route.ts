@@ -99,6 +99,12 @@ async function handleCheckoutSessionCompleted(
         throw new Error("Token API Strapi non configuré");
       }
 
+      console.log(`URL de l'API: ${BACKEND_URL}/api/users/${userId}`);
+      console.log("En-têtes:", {
+        Authorization: `Bearer ${apiToken.substring(0, 5)}...`,
+        "Content-Type": "application/json",
+      });
+
       const updateResponse = await fetch(`${BACKEND_URL}/api/users/${userId}`, {
         method: "PUT",
         headers: {
@@ -110,16 +116,39 @@ async function handleCheckoutSessionCompleted(
         }),
       });
 
+      console.log(`Statut de la réponse: ${updateResponse.status}`);
+
+      const responseText = await updateResponse.text();
+      console.log(`Réponse brute: ${responseText}`);
+
+      let responseData;
+      try {
+        responseData = JSON.parse(responseText);
+        console.log("Réponse parsée:", responseData);
+      } catch (error) {
+        console.log(
+          "Impossible de parser la réponse JSON",
+          error instanceof Error ? error.message : "Erreur inconnue"
+        );
+      }
+
       if (!updateResponse.ok) {
-        const errorData = await updateResponse.json();
         throw new Error(
-          `Erreur lors de la mise à jour de l'utilisateur: ${errorData.error?.message || "Erreur inconnue"}`
+          `Erreur lors de la mise à jour de l'utilisateur: ${
+            responseData?.error?.message ||
+            updateResponse.statusText ||
+            "Erreur inconnue"
+          }`
         );
       }
 
       console.log(`Utilisateur ${userId} marqué comme vérifié avec succès`);
     } catch (error) {
       console.error("Erreur lors de la mise à jour de isVerified:", error);
+      if (error instanceof Error) {
+        console.error("Détails de l'erreur:", error.message);
+        console.error("Stack trace:", error.stack);
+      }
     }
   } else if (session.customer_email) {
     try {
@@ -174,10 +203,27 @@ async function handleCheckoutSessionCompleted(
           }
         );
 
+        const responseText = await updateResponse.text();
+        console.log(`Réponse brute: ${responseText}`);
+
+        let responseData;
+        try {
+          responseData = JSON.parse(responseText);
+          console.log("Réponse parsée:", responseData);
+        } catch (error) {
+          console.log(
+            "Impossible de parser la réponse JSON",
+            error instanceof Error ? error.message : "Erreur inconnue"
+          );
+        }
+
         if (!updateResponse.ok) {
-          const errorData = await updateResponse.json();
           throw new Error(
-            `Erreur lors de la mise à jour de l'utilisateur: ${errorData.error?.message || "Erreur inconnue"}`
+            `Erreur lors de la mise à jour de l'utilisateur: ${
+              responseData?.error?.message ||
+              updateResponse.statusText ||
+              "Erreur inconnue"
+            }`
           );
         }
 
@@ -189,6 +235,10 @@ async function handleCheckoutSessionCompleted(
       }
     } catch (error) {
       console.error("Erreur lors de la mise à jour de isVerified:", error);
+      if (error instanceof Error) {
+        console.error("Détails de l'erreur:", error.message);
+        console.error("Stack trace:", error.stack);
+      }
     }
   } else {
     console.log("Aucun identifiant utilisateur trouvé dans la session");
