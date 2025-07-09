@@ -62,7 +62,7 @@ export const useWishlistStore = create<WishlistState>()(
           }
 
           const wishlistsResponse = await ApiHelper(
-            `wishlists?filters[user][id][$eq]=${userId}&populate=articles`,
+            `wishlists?filters[user][id][$eq]=${userId}&populate=products`,
             "GET",
             null,
             token
@@ -79,7 +79,7 @@ export const useWishlistStore = create<WishlistState>()(
           }
 
           let wishlistId = null;
-          let articleIds = [];
+          let productsIds = [];
 
           if (wishlistsResponse.data && wishlistsResponse.data.length > 0) {
             const sortedWishlists = [...wishlistsResponse.data].sort((a, b) => {
@@ -97,14 +97,14 @@ export const useWishlistStore = create<WishlistState>()(
 
             if (
               wishlist.attributes &&
-              wishlist.attributes.articles &&
-              wishlist.attributes.articles.data
+              wishlist.attributes.products &&
+              wishlist.attributes.products.data
             ) {
-              articleIds = wishlist.attributes.articles.data.map(
+              productsIds = wishlist.attributes.products.data.map(
                 (article: { id: number }) => article.id
               );
-            } else if (wishlist.articles && wishlist.articles.length > 0) {
-              articleIds = wishlist.articles.map(
+            } else if (wishlist.products && wishlist.products.length > 0) {
+              productsIds = wishlist.products.map(
                 (article: { id: number }) => article.id
               );
             }
@@ -133,7 +133,7 @@ export const useWishlistStore = create<WishlistState>()(
               {
                 data: {
                   user: userId,
-                  articles: [item.id],
+                  products: [item.id],
                 },
               },
               token
@@ -178,9 +178,9 @@ export const useWishlistStore = create<WishlistState>()(
             return true;
           }
 
-          if (!articleIds.includes(item.id)) {
+          if (!productsIds.includes(item.id)) {
             const articleResponse = await ApiHelper(
-              `articles/${item.id}`,
+              `products/${item.id}`,
               "GET",
               null,
               token
@@ -195,7 +195,7 @@ export const useWishlistStore = create<WishlistState>()(
               return true;
             }
 
-            articleIds.push(item.id);
+            productsIds.push(item.id);
           } else {
             set({ isLoading: false });
             return true;
@@ -206,7 +206,7 @@ export const useWishlistStore = create<WishlistState>()(
             "PUT",
             {
               data: {
-                articles: articleIds,
+                products: productsIds,
               },
             },
             token
@@ -273,7 +273,7 @@ export const useWishlistStore = create<WishlistState>()(
           }
 
           const wishlistsResponse = await ApiHelper(
-            `wishlists?filters[user][id][$eq]=${userId}&populate=articles`,
+            `wishlists?filters[user][id][$eq]=${userId}&populate=products`,
             "GET",
             null,
             token
@@ -297,31 +297,31 @@ export const useWishlistStore = create<WishlistState>()(
           const wishlist = sortedWishlists[0];
           const wishlistId = wishlist.id;
 
-          let currentArticles = [];
+          let currentProducts = [];
 
           if (
             wishlist.attributes &&
-            wishlist.attributes.articles &&
-            wishlist.attributes.articles.data
+            wishlist.attributes.products &&
+            wishlist.attributes.products.data
           ) {
-            currentArticles = wishlist.attributes.articles.data;
-          } else if (wishlist.articles && wishlist.articles.length > 0) {
-            currentArticles = wishlist.articles;
+            currentProducts = wishlist.attributes.products.data;
+          } else if (wishlist.products && wishlist.products.length > 0) {
+            currentProducts = wishlist.products;
           } else {
             set({ isLoading: false });
             return true;
           }
 
-          const updatedArticleIds = currentArticles
-            .map((article: { id: number }) => article.id)
-            .filter((articleId: number) => articleId !== id);
+          const updatedProductsIds = currentProducts
+            .map((product: { id: number }) => product.id)
+            .filter((productId: number) => productId !== id);
 
           const updateResponse = await ApiHelper(
             `wishlists/${wishlistId}`,
             "PUT",
             {
               data: {
-                articles: updatedArticleIds,
+                products: updatedProductsIds,
               },
             },
             token
@@ -399,16 +399,16 @@ export const useWishlistStore = create<WishlistState>()(
 
           const wishlist = sortedWishlists[0];
 
-          let articles = [];
+          let products = [];
 
           if (
             wishlist.attributes &&
-            wishlist.attributes.articles &&
-            wishlist.attributes.articles.data
+            wishlist.attributes.products &&
+            wishlist.attributes.products.data
           ) {
-            articles = wishlist.attributes.articles.data;
-          } else if (wishlist.articles && wishlist.articles.length > 0) {
-            articles = wishlist.articles;
+            products = wishlist.attributes.products.data;
+          } else if (wishlist.products && wishlist.products.length > 0) {
+            products = wishlist.products;
           } else {
             set({ items: [], isLoading: false });
             return;
@@ -416,16 +416,16 @@ export const useWishlistStore = create<WishlistState>()(
 
           const fetchedItems: WishlistItem[] = [];
 
-          for (const article of articles) {
+          for (const product of products) {
             try {
-              if (!article.attributes && !article.title) {
+              if (!product.attributes && !product.title) {
                 continue;
               }
 
-              const attributes = article.attributes || article;
+              const attributes = product.attributes || product;
 
               fetchedItems.push({
-                id: article.id,
+                id: product.id,
                 title: attributes.title || "Article sans titre",
                 price: attributes.price || 0,
                 thumbnail: attributes.images?.data?.[0]?.attributes?.formats
@@ -436,7 +436,7 @@ export const useWishlistStore = create<WishlistState>()(
               });
             } catch (err) {
               console.error(
-                `Erreur lors de la récupération de l'article ${article.id}:`,
+                `Erreur lors de la récupération de l'article ${product.id}:`,
                 err
               );
             }
